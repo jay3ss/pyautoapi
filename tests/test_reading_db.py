@@ -18,3 +18,14 @@ def test_db():
 def test_reading_tables(test_db):
     table_names = db.read_table_names(test_db)
     assert table_names == ['table1', 'table2']
+
+
+def test_reading_columns(test_db):
+    table_names = db.read_table_names(test_db)
+    columns = [
+        db.read_column_names(test_db, name) for name in table_names
+    ]
+    assert columns == [
+        ["txt", "num", "int", "rl", "blb"],
+        ["txt", "num", "int", "rl", "blb"]
+    ]
