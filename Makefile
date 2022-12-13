@@ -23,7 +23,7 @@ init-tests:
 	python tests/bin/create_test_database.py
 
 test:
-	python -m pytest -v
+	python -m pytest -vv
 
 clean:
 	rm -rf __pycache__
