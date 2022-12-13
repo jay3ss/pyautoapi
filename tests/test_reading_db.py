@@ -29,3 +29,14 @@ def test_reading_column_names(test_db):
         ["txt", "num", "int", "rl", "blb"],
         ["txt", "num", "int", "rl", "blb"]
     ]
+
+
+def test_reading_column_types(test_db):
+    table_names = db.read_table_names(test_db)
+    columns = [
+        db.read_column_names_and_types(test_db, name) for name in table_names
+    ]
+    assert columns == [
+        {"txt": "str", "num": "float", "int": "int", "rl": "float", "blb": "bytes"},
+        {"txt": "str", "num": "float", "int": "int", "rl": "float", "blb": "bytes"},
+    ]
