@@ -26,5 +26,5 @@ test:
 	python -m pytest -vv
 
 clean:
-	rm -rf __pycache__
+	find . -name __pycache__  -type d -exec rm -r "{}" \;
 
