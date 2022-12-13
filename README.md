@@ -1,7 +1,8 @@
 # PySQLiteAPI
 
 Give it your database and gives you an API with an endpoint for each column in
-each table (don't worry, you can exclude whatever table/column you like).
+each table (don't worry, you can exclude whatever table/column you like and
+specify which CRUD operations you want/don't want).
 
 ## How to Use
 

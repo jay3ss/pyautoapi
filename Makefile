@@ -13,6 +13,7 @@ setup:
 	@echo "Setting up project..."
 	python -m pip install --upgrade pip
 	python -m pip install -r requirements.txt
+	python -m pip install -e .
 
 run:
 	@echo "Running project on port $(port)"
