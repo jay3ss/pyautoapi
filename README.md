@@ -1,13 +1,13 @@
 # PySQLiteAPI
 
-Give it your database and gives you an API with an endpoint for each column in
+Give it your database and it gives you an API with an endpoint for each column in
 each table (don't worry, you can exclude whatever table/column you like).
 
 ## How to Use
 
 ### Requirements
 
-*NOTE*: This is being developed agains Python 3.10.8, so it'll work for that
+*NOTE*: This is being developed against Python 3.10.8, so it'll work for that
 version. Anything else, you're on your own.
 
 
