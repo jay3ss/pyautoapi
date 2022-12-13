@@ -1,6 +1,7 @@
 import sqlite3
 from typing import List
 
+
 def read_table_names(db: sqlite3.Connection) -> List[str]:
     """Returns the table names of the given database as a list of strings
 
