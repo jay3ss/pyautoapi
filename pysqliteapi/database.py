@@ -19,3 +19,20 @@ def read_column_names(db: sqlite3.Connection, table: str) -> List[str]:
     query = "PRAGMA table_info({});".format(table)
     with db:
         return [col[1] for col in db.execute(query).fetchall()]
+
+
+def read_column_names_and_types(db: sqlite3.Connection, table: str) -> List[dict]:
+    """
+    Returns a dict of column names and column types as a key-value pair
+    """
+    type_map = {
+        "INTEGER": int,
+        "NULL": None,
+        "REAL": float,
+        "NUMERIC": float,
+        "TEXT": str,
+        "BLOB": bytes,
+    }
+    query = "PRAGMA table_info({});".format(table)
+    with db:
+        return {col[1]: type_map[col[2]] for col in db.execute(query).fetchall()}
