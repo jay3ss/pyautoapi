@@ -19,6 +19,9 @@ run:
 	@echo "Running project on port $(port)"
 	uvicorn main:app --reload --port $(port)
 
+test:
+	python -m pytest -v
+
 clean:
 	rm -rf __pycache__
 
