@@ -130,3 +130,6 @@ dmypy.json
 
 # SQLite databases
 *.db
+
+# VS Code settings
+.vscode/
