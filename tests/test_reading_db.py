@@ -37,6 +37,6 @@ def test_reading_column_types(test_db):
         db.read_column_names_and_types(test_db, name) for name in table_names
     ]
     assert columns == [
-        {"txt": str, "num": float, "int": int, "rl": float, "blb": bytes},
-        {"txt": str, "num": float, "int": int, "rl": float, "blb": bytes},
+        {"id": int, "txt": str, "num": float, "int": int, "rl": float, "blb": bytes},
+        {"id": int, "txt": str, "num": float, "int": int, "rl": float, "blb": bytes},
     ]
