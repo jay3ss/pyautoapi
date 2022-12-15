@@ -26,8 +26,8 @@ def test_reading_column_names(test_db):
         db.read_column_names(test_db, name) for name in table_names
     ]
     assert columns == [
-        ["txt", "num", "int", "rl", "blb"],
-        ["txt", "num", "int", "rl", "blb"]
+        ["id", "txt", "num", "int", "rl", "blb"],
+        ["id", "txt", "num", "int", "rl", "blb"]
     ]
 
 
