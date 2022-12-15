@@ -23,6 +23,7 @@ def foo(x: int, y: float):
     func = magic.compile_function(function_definition)
     assert func.__annotations__ == {"x": int, "y": float}
 
+
 def test_type_defaults_of_compiled_function():
     function_definition = """
 def foo(x: int = 13, y: float = 0):
