@@ -11,7 +11,7 @@ def compile_function(function_def: str) -> types.FunctionType:
         types.FunctionType: the compiled function
     """
     # adapted from:
-    # https://stackoverflow.com/a/48760395/3562890
+    # https://stackoverflow.com/a/48760395
     namespace = {}
     exec(function_def, namespace)
     keys = set(namespace.keys())
