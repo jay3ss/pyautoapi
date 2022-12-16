@@ -1,8 +1,7 @@
 import pathlib
-from typing import Any, List, TypeVar
+from typing import TypeVar
 
 import sqlalchemy as sa
-from sqlalchemy import Float, Integer, LargeBinary, Text
 from sqlalchemy.engine.base import Engine
 
 
@@ -70,3 +69,6 @@ def inspect(db: Engine) -> dict:
         for table in insp.get_table_names()
     }
     return columns
+
+
+
