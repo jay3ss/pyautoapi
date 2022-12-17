@@ -3,7 +3,7 @@ from typing import TypeVar
 
 import sqlalchemy as sa
 from sqlalchemy.engine.base import Engine
-from sqlalchemy import Float, Integer, LargeBinary, Text
+from sqlalchemy.ext.automap import automap_base
 
 
 # adapted from @maf88's comment on:
@@ -50,12 +50,12 @@ def inspect(db: Engine) -> dict:
             }
     """
     type_map = {
-        "INTEGER": Integer,
+        "INTEGER": sa.Integer,
         "NULL": None,
-        "REAL": Float,
-        "NUMERIC": Float,
-        "TEXT": Text,
-        "BLOB": LargeBinary,
+        "REAL": sa.Float,
+        "NUMERIC": sa.Float,
+        "TEXT": sa.Text,
+        "BLOB": sa.LargeBinary,
     }
     insp = sa.inspect(db)
     columns = {
@@ -70,6 +70,3 @@ def inspect(db: Engine) -> dict:
         for table in insp.get_table_names()
     }
     return columns
-
-
-
