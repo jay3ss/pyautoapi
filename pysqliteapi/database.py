@@ -3,6 +3,7 @@ from typing import TypeVar
 
 import sqlalchemy as sa
 from sqlalchemy.engine.base import Engine
+from sqlalchemy import Float, Integer, LargeBinary, Text
 
 
 # adapted from @maf88's comment on:
