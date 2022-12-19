@@ -35,22 +35,15 @@ def test_inspect_finds_primary_key(load_db):
 
 def test_query_validator_correct_params(load_db):
     qv = db.QueryValidator(load_db)
-    assert qv.validate_params({"table": "table1"})
+    assert qv.validate_params("table1")
     # "=", "<", ">", "<>", "<=", ">=", "!="
-    params = {"table": "table1", "column": "txt", "conditional": "=", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": "<", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": ">", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": "<>", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": "<=", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": ">=", "value": "interpolate"}
-    assert qv.validate_params(params)
-    params = {"table": "table1", "column": "txt", "conditional": "!=", "value": "interpolate"}
-    assert qv.validate_params(params)
+    assert qv.validate_params("table1", "txt",  "=", "interpolate")
+    assert qv.validate_params("table1", "txt",  "<", "interpolate")
+    assert qv.validate_params("table1", "txt",  ">", "interpolate")
+    assert qv.validate_params("table1", "txt",  "<>", "interpolate")
+    assert qv.validate_params("table1", "txt",  "<=", "interpolate")
+    assert qv.validate_params("table1", "txt",  ">=", "interpolate")
+    assert qv.validate_params("table1", "txt",  "!=", "interpolate")
 
 
 def test_query_validator_missing_params(load_db):
@@ -58,17 +51,17 @@ def test_query_validator_missing_params(load_db):
     assert not qv.validate_params({})
 
     # should have column, conditional, and value (if one is present, all should be)
-    assert not qv.validate_params({"column": "txt"})
-    assert not qv.validate_params({"conditional": "="})
-    assert not qv.validate_params({"value": "interpolate"})
+    assert not qv.validate_params("txt")
+    assert not qv.validate_params( "=")
+    assert not qv.validate_params( "interpolate")
 
-    assert not qv.validate_params({"table": "table1", "column": "txt"})
-    assert not qv.validate_params({"table": "table1", "column": "txt", "conditional": "="})
-    assert not qv.validate_params({"table": "table1", "column": "txt", "value": "interpolate"})
+    assert not qv.validate_params("table1", "txt")
+    assert not qv.validate_params("table1", "txt",  "=")
+    assert not qv.validate_params("table1", "txt",  "interpolate")
 
-    assert not qv.validate_params({"table": "table1", "conditional": "="})
-    assert not qv.validate_params({"table": "table1", "conditional": "=", "column": "txt"})
-    assert not qv.validate_params({"table": "table1", "conditional": "=", "value": "interpolate"})
+    assert not qv.validate_params( "table1", "=")
+    assert not qv.validate_params( "table1", "=", "txt")
+    assert not qv.validate_params( "table1", "=", "interpolate")
 
 
 def test_query_non_existent_table(load_db):
