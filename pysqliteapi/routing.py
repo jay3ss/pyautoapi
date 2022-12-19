@@ -1,8 +1,6 @@
-import ast
-import types
 from typing import Callable, List
 
-from fastapi import APIRoute, APIRouter
+from fastapi.routing import APIRoute, APIRouter
 
 
 class Route(APIRoute):
@@ -49,17 +47,15 @@ class Router(APIRouter):
             to "", which would make the route `/param_name`.
         """
         self.namespace = namespace
-        self.create_routes(routes)
+        self._create_routes(routes)
 
     def _create_routes(self, routes: List[Route]) -> None:
         """Creates the routes"""
-        for param in self.params:
-            self.router.add_api_route(
-                path=param["name"]
-            )
+        for route in routes:
+            self.router.add_api_route(route)
 
 
-    def create_route(self, param: dict, namespace: str = None) -> Callable:
+    def _create_route(self, param: dict, namespace: str = None) -> Callable:
         """Create a FastAPI route based on the given parameter and methods
         (optionally add a namespace)
 
