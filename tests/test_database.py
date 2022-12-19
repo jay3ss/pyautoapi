@@ -90,3 +90,33 @@ def test_query_incorrect_conditional(load_db):
 
     # non-existent table
     assert not qv.validate_params({"table": "table1", "column": "col_doesn't_exist", "conditional": "incorrect", "value": "interpolate"})
+
+
+def test_models(load_db):
+    ms = db.Models(load_db)
+    assert list(ms.models.keys()) == ["table1", "table2"]
+    columns = ["id", "txt", "rl", "blb", "num", "int"]
+    for m in ms:
+        for column in columns:
+            assert hasattr(m, column)
+
+    assert ms["table1"]
+    assert ms["table2"]
+
+
+def test_query(load_db):
+    q = db.Query(load_db)
+    assert len(q.read("table1")) == 100
+    assert len(q.read("table2")) == 100
+    assert len(q.read("table1", "id", "<", 50)) == 50
+    assert len(q.read("table1", "id", "<", 1)) == 1
+    result = q.read("table1", "id", "=", 1)[0]
+    assert result.id == 1
+
+
+
+if __name__ == "__main__":
+    path = pathlib.Path(__file__).parent/"data/test.db"
+    q = db.Query(create_engine(f"sqlite:///{path}"))
+    assert len(q.read("table1")) == 100
+    assert len(q.read("table2")) == 100
