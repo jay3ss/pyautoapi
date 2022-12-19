@@ -1,14 +1,17 @@
 import pathlib
-from typing import TypeVar
+from typing import List, TypeVar
 
 import sqlalchemy as sa
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm.decl_api import DeclarativeMeta
+from sqlalchemy.orm import Session
 
 
 # adapted from @maf88's comment on:
 # https://stackoverflow.com/a/58541858
 PathLike = TypeVar("PathLike", str, pathlib.Path, None)
+ValueTypes = TypeVar("ValueTypes", int, str, float)
 
 
 def load_db(path: str|PathLike) -> Engine:
@@ -70,3 +73,171 @@ def inspect(db: Engine) -> dict:
         for table in insp.get_table_names()
     }
     return columns
+
+
+class Models:
+
+    def __init__(self, engine: Engine) -> None:
+        self._models = self._generate_models(engine)
+
+    def _generate_models(self, engine: Engine) -> list:
+        """Generates the models for each table in the given database
+
+        Returns:
+            list: list of SQLAlchemy models
+        """
+        insp = inspect(engine)
+        table_names = list(insp.keys())
+        Base = automap_base()
+        Base.prepare(autoload_with=engine, reflect=True)
+
+        return {
+            table_name: getattr(Base.classes, table_name)
+            for table_name in table_names
+        }
+
+    @property
+    def models(self) -> dict:
+        return self._models
+
+    def __iter__(self) -> DeclarativeMeta:
+        for model in self._models.values():
+            yield model
+
+    def __getitem__(self, key):
+        return self._models[key]
+
+
+class QueryValidator:
+    """Very basic SQLite query validator."""
+
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+        self._info = inspect(engine)
+
+    def validate_params(self, params: dict, ignore_type: bool = True) -> bool:
+        """Validate the params for the SQLite query
+
+        Args:
+            params (Iterable): the params to sanitize
+
+        Returns:
+            bool: True if params are valid, False otherwise
+        """
+        is_valid = self._validate_query_params(params)
+        if not ignore_type:
+            is_valid = is_valid and self._validate_value_type(params)
+
+        return is_valid
+
+    def _validate_table(self, params: dict) -> bool:
+        table_names = list(self._info)
+        return  params["table"] in table_names
+
+    def _validate_column(self, params: dict) -> bool:
+        column_names = [col["name"] for col in self._info[params["table"]]]
+        return params["column"] in column_names
+
+    def _validate_conditional(self, params: dict) -> bool:
+        return  params["conditional"] in ["=", "<", ">", "<>", "<=", ">=", "!="]
+
+    def _validate_query_params(self, params: dict) -> bool:
+        if not params:
+            return False
+
+        if not "table" in params:
+            return False
+
+        if not self._validate_table(params):
+            return False
+
+        if "conditional" in params or "value" in params or "column" in params:
+            # if one of the above is keys is present, then all need to be present
+            if not ("conditional" in params and "value" in params and "column" in params):
+                return False
+
+            if not self._validate_column(params):
+                return False
+
+            if not self._validate_conditional(params):
+                return False
+
+        return True
+
+    def _validate_value_type(self, params: dict) -> bool:
+        raise NotImplemented()
+
+
+class Query:
+    """Object to query the database.
+
+    NOTE: currently only supports the R in CRUD
+    """
+
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+        self._models = Models(engine)
+        self._validator = QueryValidator(engine)
+
+    def create(self):
+        raise NotImplementedError()
+
+    def read(self,
+        table: str,
+        column: str = None,
+        conditional: str = None,
+        value: ValueTypes = None
+    ) -> List:
+        """Runs a select statement on the given table based on the given
+        conditions (i.e., puts the R in CRUD). If you want all data points,
+        then only set the `table` argument. Otherwise, you'll need to use all
+        arguments.
+
+        Args:
+            table (str): the name of the table
+            col (str): (optional) the column to
+            conditional (str): (optional) the comparison operator to be used
+            from this set of values: ["=", "<", ">", "<>", "<=", ">="]
+            value (ValueTypes): (optional) the value to compare to (acceptable
+            types are int str, or float)
+
+        Returns:
+            Lists: returns a read query
+        """
+        params = {"table": table}
+        if conditional:
+            params.update({"conditional": conditional})
+
+        if column:
+            params.update({"column": column})
+
+        if value:
+            params.update({"value": value})
+
+        if not self._validator.validate_params(params):
+            raise InvalidQueryError("Invalid query.")
+
+        Model = self._models[table]
+        with Session(self._engine) as session:
+            if column and conditional and value:
+                if isinstance(value, str):
+                    value = f"'{value}'"
+                condition = sa.text(f"{getattr(Model, column)} {conditional} {value}")
+                statement = sa.select(Model).where(condition)
+            else:
+                statement = sa.select(Model)
+
+        return [
+            res[0] for res in session.execute(statement).all()
+        ]
+
+    def update(self):
+        raise NotImplementedError()
+
+    def delete(self):
+        raise NotImplementedError()
+
+
+
+class InvalidQueryError(Exception):
+    pass
