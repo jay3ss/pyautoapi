@@ -115,7 +115,13 @@ class QueryValidator:
         self._engine = engine
         self._info = inspect(engine)
 
-    def validate_params(self, params: dict, ignore_type: bool = True) -> bool:
+    def validate_params(self,
+        table: str,
+        column: str = None,
+        conditional: str = None,
+        value: ValueTypes = None,
+        ignore_type: bool = True
+    ) -> bool:
         """Validate the params for the SQLite query
 
         Args:
@@ -124,47 +130,47 @@ class QueryValidator:
         Returns:
             bool: True if params are valid, False otherwise
         """
-        is_valid = self._validate_query_params(params)
+        is_valid = self._validate_query_params(table, column, conditional, value)
         if not ignore_type:
-            is_valid = is_valid and self._validate_value_type(params)
+            is_valid = is_valid and self._validate_value_type(None)
 
         return is_valid
 
-    def _validate_table(self, params: dict) -> bool:
+    def _validate_table(self, table: str) -> bool:
         table_names = list(self._info)
-        return  params["table"] in table_names
+        return  table in table_names
 
-    def _validate_column(self, params: dict) -> bool:
-        column_names = [col["name"] for col in self._info[params["table"]]]
-        return params["column"] in column_names
+    def _validate_column(self, table: str, column: str) -> bool:
+        column_names = [col["name"] for col in self._info[table]]
+        return column in column_names
 
-    def _validate_conditional(self, params: dict) -> bool:
-        return  params["conditional"] in ["=", "<", ">", "<>", "<=", ">=", "!="]
+    def _validate_conditional(self, conditional: str) -> bool:
+        return  conditional in ["=", "<", ">", "<>", "<=", ">=", "!="]
 
-    def _validate_query_params(self, params: dict) -> bool:
-        if not params:
+    def _validate_query_params(self,
+        table: str,
+        column: str = None,
+        conditional: str = None,
+        value: ValueTypes = None
+    ) -> bool:
+
+        if not self._validate_table(table):
             return False
 
-        if not "table" in params:
-            return False
-
-        if not self._validate_table(params):
-            return False
-
-        if "conditional" in params or "value" in params or "column" in params:
+        if conditional or value or column:
             # if one of the above is keys is present, then all need to be present
-            if not ("conditional" in params and "value" in params and "column" in params):
+            if not (conditional and value and column):
                 return False
 
-            if not self._validate_column(params):
+            if not self._validate_column(table, column):
                 return False
 
-            if not self._validate_conditional(params):
+            if not self._validate_conditional(conditional):
                 return False
 
         return True
 
-    def _validate_value_type(self, params: dict) -> bool:
+    def _validate_value_type(self, type_: ValueTypes) -> bool:
         raise NotImplemented()
 
 
@@ -204,17 +210,8 @@ class Query:
         Returns:
             Lists: returns a read query
         """
-        params = {"table": table}
-        if conditional:
-            params.update({"conditional": conditional})
 
-        if column:
-            params.update({"column": column})
-
-        if value:
-            params.update({"value": value})
-
-        if not self._validator.validate_params(params):
+        if not self._validator.validate_params(table, column, conditional, value):
             raise InvalidQueryError("Invalid query.")
 
         Model = self._models[table]
