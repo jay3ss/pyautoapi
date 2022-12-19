@@ -70,14 +70,12 @@ def test_query_non_existent_table(load_db):
 def test_query_non_existent_column(load_db):
     qv = db.QueryValidator(load_db)
 
-    # non-existent table
+    # non-existent column
     assert not qv.validate_params("table1", "col_doesn't_exist", "!=", "interpolate")
 
 
 def test_query_incorrect_conditional(load_db):
     qv = db.QueryValidator(load_db)
-
-    # non-existent table
     assert not qv.validate_params("table1", "col_doesn't_exist", "incorrect", "interpolate")
 
 
