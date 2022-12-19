@@ -158,7 +158,7 @@ class QueryValidator:
             return False
 
         if conditional or value or column:
-            # if one of the above is keys is present, then all need to be present
+            # if one of the above is present, then all need to be present
             if not (conditional and value and column):
                 return False
 
