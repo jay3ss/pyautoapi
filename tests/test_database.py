@@ -51,24 +51,20 @@ def test_query_validator_missing_params(load_db):
     assert not qv.validate_params({})
 
     # should have column, conditional, and value (if one is present, all should be)
-    assert not qv.validate_params("txt")
-    assert not qv.validate_params( "=")
-    assert not qv.validate_params( "interpolate")
-
     assert not qv.validate_params("table1", "txt")
     assert not qv.validate_params("table1", "txt",  "=")
-    assert not qv.validate_params("table1", "txt",  "interpolate")
+    assert not qv.validate_params("table1", "txt",  value="interpolate")
 
-    assert not qv.validate_params( "table1", "=")
-    assert not qv.validate_params( "table1", "=", "txt")
-    assert not qv.validate_params( "table1", "=", "interpolate")
+    assert not qv.validate_params( "table1", conditional="=")
+    assert not qv.validate_params( "table1", conditional="=", column="txt")
+    assert not qv.validate_params( "table1", conditional="=", value="interpolate")
 
 
 def test_query_non_existent_table(load_db):
     qv = db.QueryValidator(load_db)
 
     # non-existent table
-    assert not qv.validate_params({"table": "this_table_doesn't_exist"})
+    assert not qv.validate_params("this_table_doesn't_exist")
 
 
 def test_query_non_existent_column(load_db):
@@ -105,11 +101,3 @@ def test_query(load_db):
     assert len(q.read("table1", "id", "<", 1)) == 1
     result = q.read("table1", "id", "=", 1)[0]
     assert result.id == 1
-
-
-
-if __name__ == "__main__":
-    path = pathlib.Path(__file__).parent/"data/test.db"
-    q = db.Query(create_engine(f"sqlite:///{path}"))
-    assert len(q.read("table1")) == 100
-    assert len(q.read("table2")) == 100
