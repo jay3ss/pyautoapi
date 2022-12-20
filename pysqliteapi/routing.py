@@ -1,6 +1,10 @@
-from typing import Callable, List
+from types import FunctionType
+from typing import Any, Callable, List, Optional, Tuple, TypeVar
 
 from fastapi.routing import APIRoute, APIRouter
+
+
+PathTypes = TypeVar("PathTypes", str, float, int)
 
 
 class Route(APIRoute):
@@ -10,9 +14,35 @@ class Route(APIRoute):
     https://stackoverflow.com/a/70563827
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        path: str,
+        endpoint: Callable[..., Any],
+        methods: Optional[List[str]]
+    ) -> None:
+        self.endpoint = endpoint
+        super().__init__(path, endpoint=self.endpoint, methods=methods)
 
+
+def create_route(
+    path_param: str,
+    path_type: PathTypes,
+    query_func: FunctionType
+) -> Tuple[str, FunctionType, List]:
+    """Creates a route for the app
+
+    adapted from:
+    https://stackoverflow.com/a/70563827
+
+    Args:
+        path_param (str): _description_
+        path_type (PathTypes): _description_
+        query_func (FunctionType): _description_
+
+    Returns:
+        Tuple[str, FunctionType, List]: _description_
+    """
+    pass
 
 
 class Router(APIRouter):
