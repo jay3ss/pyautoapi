@@ -3,6 +3,8 @@ from typing import Any, Callable, List, Optional, Tuple, TypeVar
 
 from fastapi.routing import APIRoute, APIRouter
 
+import magic
+
 
 PathTypes = TypeVar("PathTypes", str, float, int)
 
@@ -17,32 +19,44 @@ class Route(APIRoute):
     def __init__(
         self,
         path: str,
-        endpoint: Callable[..., Any],
+        param_type: str,
+        query_func: Callable[..., Any],
         methods: Optional[List[str]]
     ) -> None:
-        self.endpoint = endpoint
+        self.path = None
+        _, self.endpoint = create_route(path, param_type, query_func)
         super().__init__(path, endpoint=self.endpoint, methods=methods)
 
 
 def create_route(
     path_param: str,
-    path_type: PathTypes,
-    query_func: FunctionType
-) -> Tuple[str, FunctionType, List]:
+    path_param_type: PathTypes,
+    query_func: Callable,
+) -> Tuple[str, Callable]:
     """Creates a route for the app
 
     adapted from:
     https://stackoverflow.com/a/70563827
 
     Args:
-        path_param (str): _description_
-        path_type (PathTypes): _description_
-        query_func (FunctionType): _description_
+        path_param (str): path parameter
+        path_param_type (PathTypes): path parameter type
+        query_func (Callable): function to run queries
 
     Returns:
-        Tuple[str, FunctionType, List]: _description_
+        Tuple[str, Callable, List]: this returns the path (str), and endpoint
+        function (Callable)
     """
-    pass
+    # first, we must create the magic function, then we'll be using it as our
+    # endpoint
+    func_def = f"""
+    async def {path_param}_endpoint(path_param: {path_param_type}):
+        data = {query_func}(path_param)
+        return dict({path_param}=data)
+    """
+    endpoint = magic.compile_function(func_def)
+    path = f"/{path_param}"
+    return path, endpoint
 
 
 class Router(APIRouter):
@@ -85,7 +99,7 @@ class Router(APIRouter):
             self.router.add_api_route(route)
 
 
-    def _create_route(self, param: dict, namespace: str = None) -> Callable:
+    def _create_route(self, param: dict, namespace: str = None) -> FunctionType:
         """Create a FastAPI route based on the given parameter and methods
         (optionally add a namespace)
 
