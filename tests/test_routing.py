@@ -10,3 +10,7 @@ def test_create_endpoint_name():
     path = "this/is/my/path/"
     assert rt.create_endpoint_name(path, methods) == "get_post_this_is_my_path"
     path = "/this/is/my/path/"
+
+
+def test_create_path_name():
+    pass

@@ -32,6 +32,7 @@ def create_route(
     path_param: str,
     path_param_type: PathTypes,
     query_func: Callable,
+    methods: List[str]
 ) -> Tuple[str, Callable]:
     """Creates a route for the app
 
@@ -54,9 +55,32 @@ def create_route(
         data = {query_func}(path_param)
         return dict({path_param}=data)
     """
-    endpoint = magic.compile_function(func_def)
-    path = f"/{path_param}"
+    context = {"query_func": query_func}
+    endpoint = magic.compile_function(func_def, "", context)
+    path = create_path_name(path_param)
     return path, endpoint
+
+
+def create_path_name() -> str:
+    pass
+
+
+def create_endpoint_name(path: str, methods: List[str]) -> str:
+    """Creates the name for an endpoint given the path and methods available for
+    the endpoint
+
+    Args:
+        path (str): _description_
+        methods (List[str]): _description_
+
+    Returns:
+        str: _description_
+    """
+    parts = [method.lower() for method in methods]
+    # get rid of the leading and trailing "/"s otherwise we'll get empty strings
+    # which leads to a leading and trailing "_" in the function name
+    parts.extend(path.lstrip("/").rstrip("/").split("/"))
+    return "_".join(parts)
 
 
 class Router(APIRouter):
