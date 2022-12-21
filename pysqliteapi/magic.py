@@ -1,7 +1,7 @@
 import types
 
 
-def compile_function(function_def: str) -> types.FunctionType:
+def compile_function(function_def: str, function_name: str) -> types.FunctionType:
     """Compiles the given function definition (str) into a callable function
 
     Args:
@@ -12,8 +12,6 @@ def compile_function(function_def: str) -> types.FunctionType:
     """
     # adapted from:
     # https://stackoverflow.com/a/48760395
-    namespace = {}
-    exec(function_def, namespace)
-    keys = set(namespace.keys())
-    keys.remove("__builtins__")
-    return namespace[keys.pop()]
+    # namespace = {}
+    exec(function_def, globals())
+    return globals()[function_name]
