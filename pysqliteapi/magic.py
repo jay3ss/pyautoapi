@@ -1,3 +1,6 @@
+"""If some magic is happening and you want to know what's doing it, this is the
+place to start looking.
+"""
 import types
 
 
