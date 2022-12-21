@@ -60,7 +60,3 @@ def test_func2(param):
     func = magic.compile_function(function_def, "test_func2", globals())
     assert func("hello")
     assert func("hello") == {"data": "hello"}
-
-
-if __name__ == "__main__":
-    test_composing_functions()
