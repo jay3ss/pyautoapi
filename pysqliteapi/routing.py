@@ -3,7 +3,7 @@ from typing import Any, Callable, List, Optional, Tuple, TypeVar
 
 from fastapi.routing import APIRoute, APIRouter
 
-import magic
+from pysqliteapi  import magic
 
 
 PathTypes = TypeVar("PathTypes", str, float, int)
