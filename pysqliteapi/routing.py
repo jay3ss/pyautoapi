@@ -1,5 +1,8 @@
+from functools import reduce
+import re
 from types import FunctionType
 from typing import Any, Callable, List, Optional, Tuple, TypeVar
+from urllib.parse import urljoin as pathjoin
 
 from fastapi.routing import APIRoute, APIRouter
 
@@ -61,8 +64,22 @@ def create_route(
     return path, endpoint
 
 
-def create_path_name() -> str:
-    pass
+def create_path_name(*args) -> str:
+    """Creates a legal path from the given arguments
+
+    Returns:
+        str: a legal path
+    """
+    def clean_path(path: str) -> str:
+        pattern = "[^0-9a-zA-Z\-\_]+"
+        cleaned = re.sub(pattern, "", path)
+        if not cleaned:
+            return ""
+        return f"{cleaned.lower()}/"
+
+    # adapted from:
+    # https://stackoverflow.com/a/46596076
+    return "/" + reduce(pathjoin, map(clean_path, args)).rstrip("/")
 
 
 def create_endpoint_name(path: str, methods: List[str]) -> str:
