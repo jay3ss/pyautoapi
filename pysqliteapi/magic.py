@@ -1,7 +1,7 @@
 import types
 
 
-def compile_function(function_def: str, function_name: str) -> types.FunctionType:
+def compile_function(function_def: str, function_name: str, context: dict = None) -> types.FunctionType:
     """Compiles the given function definition (str) into a callable function
 
     Args:
@@ -13,5 +13,7 @@ def compile_function(function_def: str, function_name: str) -> types.FunctionTyp
     # adapted from:
     # https://stackoverflow.com/a/48760395
     # namespace = {}
-    exec(function_def, globals())
-    return globals()[function_name]
+    if not context:
+        context = globals()
+    exec(function_def, context)
+    return context[function_name]
