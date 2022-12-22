@@ -1,7 +1,7 @@
 from functools import reduce
 import re
 from types import FunctionType
-from typing import Any, Callable, List, Optional, Tuple, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 from urllib.parse import urljoin as pathjoin
 
 from fastapi.routing import APIRoute, APIRouter
@@ -24,7 +24,7 @@ class Route(APIRoute):
         path: str,
         param_type: str,
         query_func: Callable[..., Any],
-        methods: Optional[List[str]]
+        methods: Optional[list[str]]
     ) -> None:
         self.path = None
         _, self.endpoint = create_route(path, param_type, query_func)
@@ -32,11 +32,11 @@ class Route(APIRoute):
 
 
 def create_route(
-    path_param: str,
-    path_param_type: PathTypes,
+    path_params: dict[str, str],
     query_func: Callable,
-    methods: List[str]
-) -> Tuple[str, Callable]:
+    methods: list[str],
+    query_params: dict[str, str] = None,
+) -> tuple[str, Callable]:
     """Creates a route for the app
 
     adapted from:
@@ -48,30 +48,61 @@ def create_route(
         query_func (Callable): function to run queries
 
     Returns:
-        Tuple[str, Callable, List]: this returns the path (str), and endpoint
+        tuple[str, Callable, list]: this returns the path (str), and endpoint
         function (Callable)
     """
     # first, we must create the magic function, then we'll be using it as our
     # endpoint
+    params = str(path_params)[1:-1].replace("'", "")
+    args = str(list(path_params.keys()))[1:-1].replace("'", "")
+    if query_params:
+        q_params = str(query_params)[1:-1].replace("'", "")
+        params = f"{params}, {q_params}"
+        q_args = str(list(query_params.keys()))[1:-1].replace("'", "")
+        args = f"{args}, {q_args}"
+    path = create_path_name(list(path_params))
+    name = create_endpoint_name(path, methods)
     func_def = f"""
-    async def {path_param}_endpoint(path_param: {path_param_type}):
-        data = {query_func}(path_param)
-        return dict({path_param}=data)
+async def {name}_endpoint({params}):
+    return dict(data={query_func}({args}))
     """
     context = {"query_func": query_func}
-    endpoint = magic.compile_function(func_def, "", context)
-    path = create_path_name(path_param)
+    endpoint = magic.compile_function(func_def, name, context)
     return path, endpoint
 
 
-def create_path_name(*args) -> str:
-    """Creates a legal path from the given arguments
+def create_args(path_params: dict[str, str], query_params: dict[str, str] = None) -> str:
+    """
+    _summary_
+
+    Args:
+        path_params (dict[str, str]): _description_
+        query_params (dict[str, str], optional): _description_. Defaults to None.
+
+    Returns:
+        str: _description_
+    """
+    args = str(list(path_params.keys()))[1:-1].replace("'", "")
+    if query_params:
+        q_params = str(query_params)[1:-1].replace("'", "")
+        params = f"{params}, {q_params}"
+        q_args = str(list(query_params.keys()))[1:-1].replace("'", "")
+        args = f"{args}, {q_args}"
+    return args
+
+
+def create_path_name(args: list[str]) -> str:
+    """
+    Creates a legal path from the given arguments
+
+    Args:
+        args (list[str]): list of path components
 
     Returns:
         str: a legal path
     """
     def clean_path(path: str) -> str:
-        pattern = "[^0-9a-zA-Z\-\_]+"
+        pattern = r"[^0-9a-zA-Z\-\_]+"
         cleaned = re.sub(pattern, "", path)
         if not cleaned:
             return ""
@@ -82,13 +113,13 @@ def create_path_name(*args) -> str:
     return "/" + reduce(pathjoin, map(clean_path, args)).rstrip("/")
 
 
-def create_endpoint_name(path: str, methods: List[str]) -> str:
+def create_endpoint_name(path: str, methods: list[str]) -> str:
     """Creates the name for an endpoint given the path and methods available for
     the endpoint
 
     Args:
         path (str): _description_
-        methods (List[str]): _description_
+        methods (list[str]): _description_
 
     Returns:
         str: _description_
@@ -107,11 +138,11 @@ class Router(APIRouter):
     https://stackoverflow.com/a/70563827
     """
 
-    def __init__(self, routes: List[Route], namespace: str = "") -> None:
+    def __init__(self, routes: list[Route], namespace: str = "") -> None:
         """Init method
 
         Args:
-            params (List[dict]): list of dicts of parameter in which the
+            params (list[dict]): list of dicts of parameter in which the
             parameter name, parameter type, the HTTP methods allowed (as a
             list), and the endpoint function are the keys. E.g.,
 
@@ -134,7 +165,7 @@ class Router(APIRouter):
         self.namespace = namespace
         self._create_routes(routes)
 
-    def _create_routes(self, routes: List[Route]) -> None:
+    def _create_routes(self, routes: list[Route]) -> None:
         """Creates the routes"""
         for route in routes:
             self.router.add_api_route(route)
