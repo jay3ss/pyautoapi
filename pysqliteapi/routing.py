@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from functools import reduce
 import re
 from types import FunctionType
@@ -32,10 +33,12 @@ class Route(APIRoute):
 
 
 def create_route(
-    path_params: dict[str, str],
+    path_params: list[str],
+    function_params: OrderedDict[str, str],
     query_func: Callable,
     methods: list[str],
     query_params: dict[str, str] = None,
+    context: dict[str, Any] = None
 ) -> tuple[str, Callable]:
     """Creates a route for the app
 
@@ -53,21 +56,26 @@ def create_route(
     """
     # first, we must create the magic function, then we'll be using it as our
     # endpoint
-    params = str(path_params)[1:-1].replace("'", "")
-    args = str(list(path_params.keys()))[1:-1].replace("'", "")
+    params = str(function_params)[1:-1].replace("'", "")
+    args = str(list(function_params.keys()))[1:-1].replace("'", "")
     if query_params:
         q_params = str(query_params)[1:-1].replace("'", "")
         params = f"{params}, {q_params}"
         q_args = str(list(query_params.keys()))[1:-1].replace("'", "")
         args = f"{args}, {q_args}"
-    path = create_path_name(list(path_params))
+    path = create_path_name(params)
     name = create_endpoint_name(path, methods)
-    func_def = f"""
-async def {name}_endpoint({params}):
-    return dict(data={query_func}({args}))
-    """
-    context = {"query_func": query_func}
-    endpoint = magic.compile_function(func_def, name, context)
+    # func_def = f"""async def {name}_endpoint({params}):
+    # return dict(data={query_func}({args}))
+    # """
+    func_def = (
+        "async def {name}({params}):\n"
+        "\treturn dict(data={query_func}({args}))"
+    ).format(name=name, params=params, query_func=query_func.__name__, args=args)
+    additional_context = {"query_func": query_func}
+    if context:
+        additional_context.update(context)
+    endpoint = magic.compile_function(func_def, name, additional_context)
     return path, endpoint
 
 
@@ -102,7 +110,7 @@ def create_path_name(args: list[str]) -> str:
         str: a legal path
     """
     def clean_path(path: str) -> str:
-        pattern = r"[^0-9a-zA-Z\-\_]+"
+        pattern = r"[^0-9a-zA-Z\-\_{}:]+"
         cleaned = re.sub(pattern, "", path)
         if not cleaned:
             return ""
@@ -128,7 +136,7 @@ def create_endpoint_name(path: str, methods: list[str]) -> str:
     # get rid of the leading and trailing "/"s otherwise we'll get empty strings
     # which leads to a leading and trailing "_" in the function name
     parts.extend(path.lstrip("/").rstrip("/").split("/"))
-    return "_".join(parts)
+    return "_".join(parts) + "_endpoint"
 
 
 class Router(APIRouter):
