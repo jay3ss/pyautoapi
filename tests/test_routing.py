@@ -21,3 +21,7 @@ def test_create_path_name():
     assert rt.create_path_name(["this", "IS", "my", "path"]) == "/this/is/my/path"
     assert rt.create_path_name(["this", "is", "my-path"]) == "/this/is/my-path"
     assert rt.create_path_name(["this", "is", "my_path"]) == "/this/is/my_path"
+
+
+def test_create_route():
+    route = rt.create_route()
