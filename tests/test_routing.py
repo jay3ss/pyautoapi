@@ -1,4 +1,16 @@
+import pathlib
+
+import pytest
+
 import pysqliteapi.routing as rt
+import pysqliteapi.database as db
+
+
+@pytest.fixture
+def query():
+    path = pathlib.Path(__file__).parent/"data/test.db"
+    engine = db.load_db(path)
+    return db.Query(engine)
 
 
 def test_create_endpoint_name():
@@ -26,29 +38,9 @@ def test_create_path_name():
     assert rt.create_path_name(["this", "is", "my", "path", "{variable: type}"]) == "/this/is/my/path/{variable:type}"
 
 
-# def test_create_route():
-#     from typing import Any
-#     path_params = {"table": "str"}
-#     def query_func(p):
-#         return p
-#     methods = ["GET"]
-#     path_params = {"column": "str", "conditional": "str", "value": "Any"}
-#     route = rt.create_route(path_params, query_func, methods)
-#     print(route)
-
-
-if __name__ == "__main__":
-    path_params = ["table1", "id"]
-    function_params = {"table": "str", "column": "str"}
-    def query_func(p):
-        return p
+def test_create_route(query):
+    function_params = {"table": "str"}
     methods = ["GET"]
-    query_params = {"conditional": "str", "value": "int"}
-    route = rt.create_route(
-        path_params,
-        function_params,
-        query_func,
-        methods,
-        query_params
-    )
-    print(route)
+    query_params = {"column": "str", "conditional": "str", "value": "int"}
+    path, endpoint = rt.create_route(function_params, query.read, methods, query_params=query_params)
+    assert path == "/{table:str}"
