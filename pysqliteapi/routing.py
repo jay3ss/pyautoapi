@@ -33,10 +33,10 @@ class Route(APIRoute):
 
 
 def create_route(
-    path_params: list[str],
     function_params: OrderedDict[str, str],
     query_func: Callable,
     methods: list[str],
+    path_params: list[str] = None,
     query_params: dict[str, str] = None,
     context: dict[str, Any] = None
 ) -> tuple[str, Callable]:
@@ -54,25 +54,29 @@ def create_route(
         tuple[str, Callable, list]: this returns the path (str), and endpoint
         function (Callable)
     """
-    # first, we must create the magic function, then we'll be using it as our
-    # endpoint
-    params = str(function_params)[1:-1].replace("'", "")
-    args = str(list(function_params.keys()))[1:-1].replace("'", "")
-    if query_params:
-        q_params = str(query_params)[1:-1].replace("'", "")
-        params = f"{params}, {q_params}"
-        q_args = str(list(query_params.keys()))[1:-1].replace("'", "")
-        args = f"{args}, {q_args}"
-    path = create_path_name(params)
+    dict_str_to_args = lambda d: str(d)[1:-1].replace("'", "")
+    def dict_to_key_pair_brackets_strs(d: dict) -> list:
+        return [f"{{{key}: {value}}}" for key, value in d.items()]
+
+    if path_params:
+        for_path_name_creation = path_params.copy()
+        for_path_name_creation.extend(dict_to_key_pair_brackets_strs(function_params))
+    else:
+        for_path_name_creation = dict_to_key_pair_brackets_strs(function_params)
+    path = create_path_name(for_path_name_creation)
     name = create_endpoint_name(path, methods)
-    # func_def = f"""async def {name}_endpoint({params}):
-    # return dict(data={query_func}({args}))
-    # """
+    params = str(function_params)[1:-1].replace("'", "")
+    args = dict_str_to_args(list(function_params.keys()))
+    if query_params:
+        q_params = dict_str_to_args(query_params)
+        params = f"{params}, {q_params}"
+        q_args = dict_str_to_args(list(query_params.keys()))
+        args = f"{args}, {q_args}"
     func_def = (
         "async def {name}({params}):\n"
         "\treturn dict(data={query_func}({args}))"
     ).format(name=name, params=params, query_func=query_func.__name__, args=args)
-    additional_context = {"query_func": query_func}
+    additional_context = {query_func.__name__: query_func}
     if context:
         additional_context.update(context)
     endpoint = magic.compile_function(func_def, name, additional_context)
@@ -136,7 +140,7 @@ def create_endpoint_name(path: str, methods: list[str]) -> str:
     # get rid of the leading and trailing "/"s otherwise we'll get empty strings
     # which leads to a leading and trailing "_" in the function name
     parts.extend(path.lstrip("/").rstrip("/").split("/"))
-    return "_".join(parts) + "_endpoint"
+    return "_".join([p for p in parts if "{" not in p]) + "_endpoint"
 
 
 class Router(APIRouter):
