@@ -65,17 +65,19 @@ def create_route(
         for_path_name_creation = dict_to_key_pair_brackets_strs(function_params)
     path = create_path_name(for_path_name_creation)
     name = create_endpoint_name(path, methods)
-    params = str(function_params)[1:-1].replace("'", "")
+    params = dict_to_key_pair_brackets_strs(function_params)
     args = dict_str_to_args(list(function_params.keys()))
     if query_params:
-        q_params = dict_str_to_args(query_params)
-        params = f"{params}, {q_params}"
+        q_params = dict_to_key_pair_brackets_strs(query_params)
+        params.extend(q_params)
         q_args = dict_str_to_args(list(query_params.keys()))
         args = f"{args}, {q_args}"
+
+    func_params = ", ".join(p.translate({ord("{"): None, ord("}"): None}) for p in params)
     func_def = (
         "async def {name}({params}):\n"
         "\treturn dict(data={query_func}({args}))"
-    ).format(name=name, params=params, query_func=query_func.__name__, args=args)
+    ).format(name=name, params=func_params, query_func=query_func.__name__, args=args)
     additional_context = {query_func.__name__: query_func}
     if context:
         additional_context.update(context)
@@ -140,7 +142,8 @@ def create_endpoint_name(path: str, methods: list[str]) -> str:
     # get rid of the leading and trailing "/"s otherwise we'll get empty strings
     # which leads to a leading and trailing "_" in the function name
     parts.extend(path.lstrip("/").rstrip("/").split("/"))
-    return "_".join([p for p in parts if "{" not in p]) + "_endpoint"
+    table = {ord("/"): None, ord("{"): None, ord("}"): None, ord(":"): "_"}
+    return "_".join([p.translate(table) for p in parts]) + "_endpoint"
 
 
 class Router(APIRouter):
