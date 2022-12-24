@@ -39,6 +39,17 @@ def test_create_path_name():
     assert rt.create_path_name(["this", "is", "my", "path", "{variable: type}"]) == "/this/is/my/path/{variable:type}"
 
 
+def test_create_route_basic(query):
+    function_params = {"table": "str"}
+    methods = ["GET"]
+    path, endpoint = rt.create_route(function_params, query.read, methods)
+    assert path == "/{table:str}"
+    assert endpoint.__name__ == "get_table_str_endpoint"
+    async def get_num_results():
+        assert len((await endpoint("table1"))["data"]) == 100
+    asyncio.run(get_num_results())
+
+
 def test_create_route_query_params(query):
     function_params = {"table": "str"}
     methods = ["GET"]
@@ -48,3 +59,4 @@ def test_create_route_query_params(query):
     async def get_num_results():
         assert len((await endpoint("table1", "id", "=", 1))["data"]) == 1
     asyncio.run(get_num_results())
+    assert endpoint.__name__ == "get_table_str_endpoint"
