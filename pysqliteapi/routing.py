@@ -51,8 +51,8 @@ def create_route(
         query_func (Callable): function to run queries
 
     Returns:
-        tuple[str, Callable, list]: this returns the path (str), and endpoint
-        function (Callable)
+        tuple[str, Callable]: this returns the path (str), and endpoint function
+        (Callable)
     """
     dict_str_to_args = lambda d: str(d)[1:-1].replace("'", "")
     def dict_to_key_pair_brackets_strs(d: dict) -> list:
