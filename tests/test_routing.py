@@ -45,6 +45,6 @@ def test_create_route(query):
     query_params = {"column": "str", "conditional": "str", "value": "int"}
     path, endpoint = rt.create_route(function_params, query.read, methods, query_params=query_params)
     assert path == "/{table:str}"
-    async def get_num_results() -> int:
+    async def get_num_results():
         assert len((await endpoint("table1", "id", "=", 1))["data"]) == 1
     asyncio.run(get_num_results())
