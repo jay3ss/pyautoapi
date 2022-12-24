@@ -39,7 +39,7 @@ def test_create_path_name():
     assert rt.create_path_name(["this", "is", "my", "path", "{variable: type}"]) == "/this/is/my/path/{variable:type}"
 
 
-def test_create_route(query):
+def test_create_route_query_params(query):
     function_params = {"table": "str"}
     methods = ["GET"]
     query_params = {"column": "str", "conditional": "str", "value": "int"}
