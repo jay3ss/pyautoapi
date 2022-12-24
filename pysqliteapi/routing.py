@@ -97,7 +97,7 @@ def create_args(path_params: dict[str, str], query_params: dict[str, str] = None
         str: the prepared string of arguments and their types. E.g.,
         path_params = {"table": "str"}
         query_params = {"column": "str", "column": "str", conditional: "str", "value": "Any"}
-        yields args = "table: str, column: str, column: st", conditional: str, value: Any"
+        yields args = "table: str, column: str, column: str, conditional: str, value: Any"
     """
     args = str(list(path_params.keys()))[1:-1].replace("'", "")
     if query_params:
