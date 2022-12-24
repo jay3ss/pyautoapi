@@ -86,15 +86,18 @@ def create_route(
 
 
 def create_args(path_params: dict[str, str], query_params: dict[str, str] = None) -> str:
-    """
-    _summary_
+    """Create the arguments string for the generated function
 
     Args:
-        path_params (dict[str, str]): _description_
-        query_params (dict[str, str], optional): _description_. Defaults to None.
+        path_params (dict[str, str]): Parameters that the generated function uses
+        query_params (dict[str, str], optional): Query parameters for the path.
+        Defaults to None.
 
     Returns:
-        str: _description_
+        str: the prepared string of arguments and their types. E.g.,
+        path_params = {"table": "str"}
+        query_params = {"column": "str", "column": "str", conditional: "str", "value": "Any"}
+        yields args = "table: str, column: str, column: st", conditional: str, value: Any"
     """
     args = str(list(path_params.keys()))[1:-1].replace("'", "")
     if query_params:
