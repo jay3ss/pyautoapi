@@ -140,23 +140,3 @@ class Route(APIRoute):
         methods: set[str]|list[str] = None
     ) -> None:
         super().__init__(path, endpoint, methods=methods)
-
-
-class Router(APIRouter):
-    """Router for the app
-
-    adapted from:
-    https://stackoverflow.com/a/70563827
-    """
-
-    def __init__(self, routes: list[tuple[str, Callable, list]], prefix: str = "") -> None:
-        """Init method
-
-        Args:
-            routes (list[tuple[str, Callable, list]]): list of
-            prefix (str, optional): the prefix to be prepended to the routes.
-            E.g., a prefix of "myapi" and a params value of the one given above
-            would result in a route of `/myapi/param_name`. Defaults
-            to "", which would make the route `/param_name`.
-        """
-        super().__init__(prefix=prefix, routes=routes)
