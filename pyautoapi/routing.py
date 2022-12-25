@@ -4,7 +4,7 @@ import re
 from typing import Any, Callable
 from urllib.parse import urljoin as pathjoin
 
-from fastapi.routing import APIRoute, APIRouter
+from fastapi.routing import APIRoute
 
 from pyautoapi  import magic
 
