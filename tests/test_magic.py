@@ -1,6 +1,6 @@
 import types
 
-from pysqliteapi import magic
+from pyautoapi import magic
 
 
 def test_compiling_function():

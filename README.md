@@ -1,4 +1,4 @@
-# PySQLiteAPI
+# PyAutoAPI
 
 Give it your database and it gives you an API with an endpoint for each column in
 each table (don't worry, you can exclude whatever table/column you like).
@@ -22,7 +22,7 @@ Let's create a file called `main.py` with the following contents
 import pysqliteapi as pyapi
 
 
-api = pyapi.API("mydatabase.db")
+api = pyapi.PyAutoAPI("mydatabase.db")
 ```
 
 In your terminal run
@@ -37,5 +37,5 @@ INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 ```
 
-(If the above terminal looks familiar, it's because `PySQLiteAPI` uses `FastAPI`
+(If the above terminal looks familiar, it's because `PyAutoAPI` uses `FastAPI`
 under the hood.)

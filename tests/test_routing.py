@@ -3,8 +3,8 @@ import pathlib
 
 import pytest
 
-import pysqliteapi.routing as rt
-import pysqliteapi.database as db
+import pyautoapi.routing as rt
+import pyautoapi.database as db
 
 
 @pytest.fixture

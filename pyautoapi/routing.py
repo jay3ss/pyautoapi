@@ -6,7 +6,7 @@ from urllib.parse import urljoin as pathjoin
 
 from fastapi.routing import APIRoute, APIRouter
 
-from pysqliteapi  import magic
+from pyautoapi  import magic
 
 
 def create_route(

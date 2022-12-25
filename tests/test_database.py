@@ -3,7 +3,7 @@ import pathlib
 import pytest
 from sqlalchemy import create_engine
 
-import pysqliteapi.database as db
+import pyautoapi.database as db
 
 
 @pytest.fixture

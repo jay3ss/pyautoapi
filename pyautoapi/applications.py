@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-import pysqliteapi.routing as rt
+import pyautoapi.routing as rt
 
 
 class PyAutoAPI(FastAPI):
