@@ -4,7 +4,7 @@ import re
 from typing import Any, Callable
 from urllib.parse import urljoin as pathjoin
 
-from fastapi.routing import APIRouter
+from fastapi.routing import APIRoute, APIRouter
 
 from pysqliteapi  import magic
 
@@ -132,6 +132,16 @@ def create_endpoint_name(path: str, methods: list[str]) -> str:
     return "_".join([p.translate(table) for p in parts]) + "_endpoint"
 
 
+class Route(APIRoute):
+    def __init__(
+        self,
+        path: str,
+        endpoint: Callable[..., Any],
+        methods: set[str]|list[str] = None
+    ) -> None:
+        super().__init__(path, endpoint, methods=methods)
+
+
 class Router(APIRouter):
     """Router for the app
 
@@ -149,12 +159,4 @@ class Router(APIRouter):
             would result in a route of `/myapi/param_name`. Defaults
             to "", which would make the route `/param_name`.
         """
-        super().__init__(prefix=prefix)
-
-        self._add_routes(routes)
-
-    def _add_routes(self, routes: list) -> None:
-        """Add the routes"""
-        for route in routes:
-            path, endpoint, methods = route
-            self.add_api_route(path=path, endpoint=endpoint, methods=methods)
+        super().__init__(prefix=prefix, routes=routes)
