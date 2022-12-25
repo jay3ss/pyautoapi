@@ -27,8 +27,7 @@ class Route(APIRoute):
         query_func: Callable[..., Any],
         methods: Optional[list[str]]
     ) -> None:
-        self.path = None
-        _, self.endpoint = create_route(path, param_type, query_func)
+        self.path, self.endpoint = create_route(path, param_type, query_func)
         super().__init__(path, endpoint=self.endpoint, methods=methods)
 
 
