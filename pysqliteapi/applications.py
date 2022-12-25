@@ -5,10 +5,11 @@ import pysqliteapi.routing as rt
 
 class PyAutoAPI(FastAPI):
     def __init__(
-        self, *,
+        self,
+        *,
         debug: bool = False,
         routes: list[rt.Route] = None,
-        title: str = "PyAPI",
+        title: str = "PyAutoAPI",
         description: str = "",
         version: str = "0.0.1",
     ) -> None:
