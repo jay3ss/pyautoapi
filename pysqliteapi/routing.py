@@ -1,34 +1,12 @@
 from collections import OrderedDict
 from functools import reduce
 import re
-from types import FunctionType
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable
 from urllib.parse import urljoin as pathjoin
 
-from fastapi.routing import APIRoute, APIRouter
+from fastapi.routing import APIRouter
 
 from pysqliteapi  import magic
-
-
-PathTypes = TypeVar("PathTypes", str, float, int)
-
-
-class Route(APIRoute):
-    """Creates a route for the app
-
-    adapted from:
-    https://stackoverflow.com/a/70563827
-    """
-
-    def __init__(
-        self,
-        path: str,
-        param_type: str,
-        query_func: Callable[..., Any],
-        methods: Optional[list[str]]
-    ) -> None:
-        self.path, self.endpoint = create_route(path, param_type, query_func)
-        super().__init__(path, endpoint=self.endpoint, methods=methods)
 
 
 def create_route(
@@ -45,13 +23,19 @@ def create_route(
     https://stackoverflow.com/a/70563827
 
     Args:
-        path_param (str): path parameter
-        path_param_type (PathTypes): path parameter type
-        query_func (Callable): function to run queries
+        function_params (OrderedDict[str, str]): parameters for the generated
+        endpoint function
+        query_func (Callable): the function to query the database
+        methods (list[str]): HTTP methods to use (e.g., GET, POST, etc.)
+        path_params (list[str], optional): extra parameters for the path. Defaults
+        to None.
+        query_params (dict[str, str], optional): parameters for the query, if used.
+        Defaults to None.
+        context (dict[str, Any], optional): Any extra context to include for
+        function generation such as an extra type. Defaults to None.
 
     Returns:
-        tuple[str, Callable]: this returns the path (str), and endpoint function
-        (Callable)
+        tuple[str, Callable]: the path (str), and endpoint function (Callable)
     """
     dict_str_to_args = lambda d: str(d)[1:-1].replace("'", "")
     def dict_to_key_pair_brackets_strs(d: dict) -> list:
@@ -155,61 +139,22 @@ class Router(APIRouter):
     https://stackoverflow.com/a/70563827
     """
 
-    def __init__(self, routes: list[Route], namespace: str = "") -> None:
+    def __init__(self, routes: list[tuple[str, Callable, list]], prefix: str = "") -> None:
         """Init method
 
         Args:
-            params (list[dict]): list of dicts of parameter in which the
-            parameter name, parameter type, the HTTP methods allowed (as a
-            list), and the endpoint function are the keys. E.g.,
-
-            [
-                ...,
-                {
-                    "name": "param_name",
-                    "type": str,
-                    "methods": ["GET", "POST"],
-                    "endpoint": "func",
-                }
-                ...,
-            ]
-
-            namespace (str, optional): The name space to be prepended to the
-            route. E.g., a namespace of "myapi" and a params value of the one
-            given above would result in a route of `/myapi/param_name`. Defaults
+            routes (list[tuple[str, Callable, list]]): list of
+            prefix (str, optional): the prefix to be prepended to the routes.
+            E.g., a prefix of "myapi" and a params value of the one given above
+            would result in a route of `/myapi/param_name`. Defaults
             to "", which would make the route `/param_name`.
         """
-        self.namespace = namespace
-        self._create_routes(routes)
+        super().__init__(prefix=prefix)
 
-    def _create_routes(self, routes: list[Route]) -> None:
-        """Creates the routes"""
+        self._add_routes(routes)
+
+    def _add_routes(self, routes: list) -> None:
+        """Add the routes"""
         for route in routes:
-            self.router.add_api_route(route)
-
-
-    def _create_route(self, param: dict, namespace: str = None) -> FunctionType:
-        """Create a FastAPI route based on the given parameter and methods
-        (optionally add a namespace)
-
-        Args:
-            param (dict): parameter in which the parameter name, parameter type,
-            and the HTTP methods allowed (as a list) are the keys. E.g.,
-
-            [
-                ...,
-                {"name": "param_name", "type": str, "methods": ["GET", "POST"]}
-                ...,
-            ]
-
-            namespace (str, optional): The name space to be prepended to the
-            route. E.g., a namespace of "myapi" and a params value of the one
-            given above would result in a route of `/myapi/param_name`. Defaults
-            to None, which would make the route `/param_name`.
-
-        Returns:
-            Callable: the route
-        """
-        # adapted from:
-        # https://stackoverflow.com/a/70563827
-        pass
+            path, endpoint, methods = route
+            self.add_api_route(path=path, endpoint=endpoint, methods=methods)
