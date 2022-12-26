@@ -39,3 +39,6 @@ INFO:     Application startup complete.
 
 (If the above terminal looks familiar, it's because `PyAutoAPI` uses `FastAPI`
 under the hood.)
+
+Now navigate to [localhost:8000/docs](http://localhost:8000/docs) to see the
+Swagger UI.
