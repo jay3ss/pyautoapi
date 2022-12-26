@@ -23,7 +23,9 @@ init-tests:
 	python tests/bin/create_test_database.py
 
 test:
+	python tests/bin/create_test_database.py
 	python -m pytest -vv
+	rm tests/data/test.db
 
 clean:
 	rm -rf `find . -name __pycache__  -type d`
