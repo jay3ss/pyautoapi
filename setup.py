@@ -2,9 +2,9 @@ from distutils.core import setup
 
 
 setup(
-    name="PySQLiteAPI",
-    version="0.0.1",
+    name="PyAutoAPI",
+    version="0.0.2",
     description="Turn a SQLite database into an API",
     author="jay3ss",
-    py_modules=["pysqliteapi"],
+    py_modules=["pyautoapi"],
 )
