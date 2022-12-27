@@ -19,10 +19,6 @@ dev-setup:
 	@echo "Setting up project for development..."
 	python -m pip install -r requirements-dev.txt
 
-run:
-	@echo "Running project on port $(port)"
-	uvicorn main:app --reload --port $(port)
-
 test:
 	python tests/bin/create_test_database.py
 	python -m pytest -vv
