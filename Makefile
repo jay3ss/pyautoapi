@@ -23,9 +23,6 @@ run:
 	@echo "Running project on port $(port)"
 	uvicorn main:app --reload --port $(port)
 
-init-tests:
-	python tests/bin/create_test_database.py
-
 test:
 	python tests/bin/create_test_database.py
 	python -m pytest -vv
