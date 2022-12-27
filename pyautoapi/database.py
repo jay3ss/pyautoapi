@@ -14,7 +14,7 @@ PathLike = TypeVar("PathLike", str, pathlib.Path, None)
 ValueTypes = TypeVar("ValueTypes", int, str, float)
 
 
-def load_db(path: str|PathLike) -> Engine:
+def load_db(path: str | PathLike) -> Engine:
     """Returns a connection to the SQLite database
 
     Args:
@@ -66,7 +66,7 @@ def inspect(db: Engine) -> dict:
             {
                 "name": col["name"],
                 "type": type_map[str(col["type"])],
-                "primary_key": bool(col["primary_key"])
+                "primary_key": bool(col["primary_key"]),
             }
             for col in insp.get_columns(table)
         ]
@@ -76,7 +76,6 @@ def inspect(db: Engine) -> dict:
 
 
 class Models:
-
     def __init__(self, engine: Engine) -> None:
         self._models = self._generate_models(engine)
 
@@ -92,8 +91,7 @@ class Models:
         Base.prepare(autoload_with=engine, reflect=True)
 
         return {
-            table_name: getattr(Base.classes, table_name)
-            for table_name in table_names
+            table_name: getattr(Base.classes, table_name) for table_name in table_names
         }
 
     @property
@@ -115,12 +113,13 @@ class QueryValidator:
         self._engine = engine
         self._info = inspect(engine)
 
-    def validate_params(self,
+    def validate_params(
+        self,
         table: str,
         column: str = None,
         conditional: str = None,
         value: ValueTypes = None,
-        ignore_type: bool = True
+        ignore_type: bool = True,
     ) -> bool:
         """Validate the params for the SQLite query
 
@@ -138,20 +137,21 @@ class QueryValidator:
 
     def _validate_table(self, table: str) -> bool:
         table_names = list(self._info)
-        return  table in table_names
+        return table in table_names
 
     def _validate_column(self, table: str, column: str) -> bool:
         column_names = [col["name"] for col in self._info[table]]
         return column in column_names
 
     def _validate_conditional(self, conditional: str) -> bool:
-        return  conditional in ["=", "<", ">", "<>", "<=", ">=", "!="]
+        return conditional in ["=", "<", ">", "<>", "<=", ">=", "!="]
 
-    def _validate_query_params(self,
+    def _validate_query_params(
+        self,
         table: str,
         column: str = None,
         conditional: str = None,
-        value: ValueTypes = None
+        value: ValueTypes = None,
     ) -> bool:
 
         if not self._validate_table(table):
@@ -188,11 +188,12 @@ class Query:
     def create(self):
         raise NotImplementedError()
 
-    def read(self,
+    def read(
+        self,
         table: str,
         column: str = None,
         conditional: str = None,
-        value: ValueTypes = None
+        value: ValueTypes = None,
     ) -> List:
         """Runs a select statement on the given table based on the given
         conditions (i.e., puts the R in CRUD). If you want all data points,
@@ -224,16 +225,13 @@ class Query:
             else:
                 statement = sa.select(Model)
 
-        return [
-            res[0] for res in session.execute(statement).all()
-        ]
+        return [res[0] for res in session.execute(statement).all()]
 
     def update(self):
         raise NotImplementedError()
 
     def delete(self):
         raise NotImplementedError()
-
 
 
 class InvalidQueryError(Exception):

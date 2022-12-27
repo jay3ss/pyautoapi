@@ -4,7 +4,9 @@ place to start looking.
 import types
 
 
-def compile_function(definition: str, name: str, context: dict = None) -> types.FunctionType:
+def compile_function(
+    definition: str, name: str, context: dict = None
+) -> types.FunctionType:
     """Compiles the given function definition (str) into a callable function
 
     Args:

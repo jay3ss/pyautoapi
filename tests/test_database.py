@@ -8,7 +8,7 @@ import pyautoapi.database as db
 
 @pytest.fixture
 def load_db():
-    path = pathlib.Path(__file__).parent/"data/test.db"
+    path = pathlib.Path(__file__).parent / "data/test.db"
     return create_engine(f"sqlite:///{path}")
 
 
@@ -37,13 +37,13 @@ def test_query_validator_correct_params(load_db):
     qv = db.QueryValidator(load_db)
     assert qv.validate_params("table1")
     # "=", "<", ">", "<>", "<=", ">=", "!="
-    assert qv.validate_params("table1", "txt",  "=", "interpolate")
-    assert qv.validate_params("table1", "txt",  "<", "interpolate")
-    assert qv.validate_params("table1", "txt",  ">", "interpolate")
-    assert qv.validate_params("table1", "txt",  "<>", "interpolate")
-    assert qv.validate_params("table1", "txt",  "<=", "interpolate")
-    assert qv.validate_params("table1", "txt",  ">=", "interpolate")
-    assert qv.validate_params("table1", "txt",  "!=", "interpolate")
+    assert qv.validate_params("table1", "txt", "=", "interpolate")
+    assert qv.validate_params("table1", "txt", "<", "interpolate")
+    assert qv.validate_params("table1", "txt", ">", "interpolate")
+    assert qv.validate_params("table1", "txt", "<>", "interpolate")
+    assert qv.validate_params("table1", "txt", "<=", "interpolate")
+    assert qv.validate_params("table1", "txt", ">=", "interpolate")
+    assert qv.validate_params("table1", "txt", "!=", "interpolate")
 
 
 def test_query_validator_missing_params(load_db):
@@ -52,12 +52,12 @@ def test_query_validator_missing_params(load_db):
 
     # should have column, conditional, and value (if one is present, all should be)
     assert not qv.validate_params("table1", "txt")
-    assert not qv.validate_params("table1", "txt",  "=")
-    assert not qv.validate_params("table1", "txt",  value="interpolate")
+    assert not qv.validate_params("table1", "txt", "=")
+    assert not qv.validate_params("table1", "txt", value="interpolate")
 
-    assert not qv.validate_params( "table1", conditional="=")
-    assert not qv.validate_params( "table1", conditional="=", column="txt")
-    assert not qv.validate_params( "table1", conditional="=", value="interpolate")
+    assert not qv.validate_params("table1", conditional="=")
+    assert not qv.validate_params("table1", conditional="=", column="txt")
+    assert not qv.validate_params("table1", conditional="=", value="interpolate")
 
 
 def test_query_non_existent_table(load_db):
@@ -76,7 +76,9 @@ def test_query_non_existent_column(load_db):
 
 def test_query_incorrect_conditional(load_db):
     qv = db.QueryValidator(load_db)
-    assert not qv.validate_params("table1", "col_doesn't_exist", "incorrect", "interpolate")
+    assert not qv.validate_params(
+        "table1", "col_doesn't_exist", "incorrect", "interpolate"
+    )
 
 
 def test_models(load_db):
