@@ -59,7 +59,7 @@ def create_route(
         p.translate({ord("{"): None, ord("}"): None}) for p in params
     )
     func_def = (
-        "async def {name}({params}):\n" "\treturn dict(data={query_func}({args}))"
+        "async def {name}({params}):\n\treturn dict(data={query_func}({args}))"
     ).format(name=name, params=func_params, query_func=query_func.__name__, args=args)
     additional_context = {query_func.__name__: query_func}
     if context:
