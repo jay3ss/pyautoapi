@@ -171,7 +171,7 @@ class QueryValidator:
         return True
 
     def _validate_value_type(self, type_: ValueTypes) -> bool:
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class Query:
