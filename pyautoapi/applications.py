@@ -34,11 +34,11 @@ class PyAutoAPI(FastAPI):
             )
 
 
-def _create_all_routes(db_path: str) -> list[rt.Route]:
+def _create_all_routes(db_path: PathLike) -> list[rt.Route]:
     """Creates all the routes for the given database
 
     Args:
-        db_path (str): path to the database
+        db_path (PathLike): path to the database
 
     Returns:
         list[rt.Route]: the routes
