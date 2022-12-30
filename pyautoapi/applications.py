@@ -35,8 +35,15 @@ class PyAutoAPI(FastAPI):
 
 
 def _create_all_routes(db_path: str) -> list[rt.Route]:
+    """Creates all the routes for the given database
+
+    Args:
+        db_path (str): path to the database
+
+    Returns:
+        list[rt.Route]: the routes
+    """
     engine = db.load_db(pathlib.Path(db_path))
-    # inspector = db.inspect(engine)
     query = db.Query(engine)
 
     function_params = {"table": "str"}
