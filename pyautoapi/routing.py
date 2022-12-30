@@ -37,8 +37,6 @@ def create_route(
     Returns:
         tuple[str, Callable]: the path (str), and endpoint function (Callable)
     """
-    dict_str_to_args = lambda d: str(d)[1:-1].replace("'", "")
-
     def dict_to_key_pair_brackets_strs(d: dict) -> list:
         return [f"{{{key}: {value}}}" for key, value in d.items()]
 
@@ -50,11 +48,11 @@ def create_route(
     path = create_path_name(for_path_name_creation)
     name = create_endpoint_name(path, methods)
     params = dict_to_key_pair_brackets_strs(function_params)
-    args = dict_str_to_args(list(function_params.keys()))
+    args = _dict_str_to_args(list(function_params.keys()))
     if query_params:
         q_params = dict_to_key_pair_brackets_strs(query_params)
         params.extend(q_params)
-        q_args = dict_str_to_args(list(query_params.keys()))
+        q_args = _dict_str_to_args(list(query_params.keys()))
         args = f"{args}, {q_args}"
 
     func_params = ", ".join(
@@ -86,11 +84,9 @@ def create_args(
         query_params = {"column": "str", "column": "str", conditional: "str", "value": "Any"}
         yields args = "table: str, column: str, column: str, conditional: str, value: Any"
     """
-    args = str(list(path_params.keys()))[1:-1].replace("'", "")
+    args = _dict_str_to_args(path_params.keys())
     if query_params:
-        q_params = str(query_params)[1:-1].replace("'", "")
-        params = f"{params}, {q_params}"
-        q_args = str(list(query_params.keys()))[1:-1].replace("'", "")
+        q_args = _dict_str_to_args(query_params.keys())
         args = f"{args}, {q_args}"
     return args
 
@@ -145,3 +141,7 @@ class Route(APIRoute):
         methods: set[str] | list[str] = None,
     ) -> None:
         super().__init__(path, endpoint, methods=methods)
+
+
+def _dict_str_to_args(d: dict) -> str:
+    return str(d)[1:-1].replace("'", "")
