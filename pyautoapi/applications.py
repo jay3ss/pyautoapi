@@ -25,7 +25,7 @@ class PyAutoAPI(FastAPI):
             routes=None,
             title=title,
             description=description,
-            version=version
+            version=version,
         )
         routes = _create_all_routes(db_path)
         for route in routes:

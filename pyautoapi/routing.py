@@ -6,7 +6,7 @@ from urllib.parse import urljoin as pathjoin
 
 from fastapi.routing import APIRoute
 
-from pyautoapi  import magic
+from pyautoapi import magic
 
 
 def create_route(
@@ -15,7 +15,7 @@ def create_route(
     methods: list[str],
     path_params: list[str] = None,
     query_params: dict[str, str] = None,
-    context: dict[str, Any] = None
+    context: dict[str, Any] = None,
 ) -> tuple[str, Callable]:
     """Creates a route for the app
 
@@ -38,6 +38,7 @@ def create_route(
         tuple[str, Callable]: the path (str), and endpoint function (Callable)
     """
     dict_str_to_args = lambda d: str(d)[1:-1].replace("'", "")
+
     def dict_to_key_pair_brackets_strs(d: dict) -> list:
         return [f"{{{key}: {value}}}" for key, value in d.items()]
 
@@ -56,10 +57,11 @@ def create_route(
         q_args = dict_str_to_args(list(query_params.keys()))
         args = f"{args}, {q_args}"
 
-    func_params = ", ".join(p.translate({ord("{"): None, ord("}"): None}) for p in params)
+    func_params = ", ".join(
+        p.translate({ord("{"): None, ord("}"): None}) for p in params
+    )
     func_def = (
-        "async def {name}({params}):\n"
-        "\treturn dict(data={query_func}({args}))"
+        "async def {name}({params}):\n" "\treturn dict(data={query_func}({args}))"
     ).format(name=name, params=func_params, query_func=query_func.__name__, args=args)
     additional_context = {query_func.__name__: query_func}
     if context:
@@ -68,7 +70,9 @@ def create_route(
     return path, endpoint
 
 
-def create_args(path_params: dict[str, str], query_params: dict[str, str] = None) -> str:
+def create_args(
+    path_params: dict[str, str], query_params: dict[str, str] = None
+) -> str:
     """Create the arguments string for the generated function
 
     Args:
@@ -101,6 +105,7 @@ def create_path_name(args: list[str]) -> str:
     Returns:
         str: a legal path
     """
+
     def clean_path(path: str) -> str:
         pattern = r"[^0-9a-zA-Z\-\_{}:]+"
         cleaned = re.sub(pattern, "", path)
@@ -137,6 +142,6 @@ class Route(APIRoute):
         self,
         path: str,
         endpoint: Callable[..., Any],
-        methods: set[str]|list[str] = None
+        methods: set[str] | list[str] = None,
     ) -> None:
         super().__init__(path, endpoint, methods=methods)

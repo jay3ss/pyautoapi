@@ -11,7 +11,7 @@ each table (don't worry, you can exclude whatever table/column you like).
 version. Anything else, you're on your own.
 
 
-It's pretty simple to use. Create a file, import and instantiate a `pysqliteapi.API`
+It's pretty simple to use. Create a file, import and instantiate a `pyautoapi.API`
 object, then run `uvicorn`. That's it!
 
 ### Example
@@ -19,7 +19,7 @@ object, then run `uvicorn`. That's it!
 Let's create a file called `main.py` with the following contents
 
 ```python
-import pysqliteapi as pyapi
+import pyautoapi as pyapi
 
 
 api = pyapi.PyAutoAPI("mydatabase.db")
@@ -39,3 +39,6 @@ INFO:     Application startup complete.
 
 (If the above terminal looks familiar, it's because `PyAutoAPI` uses `FastAPI`
 under the hood.)
+
+Now navigate to [localhost:8000/docs](http://localhost:8000/docs) to see the
+Swagger UI.

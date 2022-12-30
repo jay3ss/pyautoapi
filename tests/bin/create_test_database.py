@@ -12,12 +12,12 @@ def create_test_database(fname="test.db") -> None:
     tables (table1, table2).
     """
     path = parent.parent
-    conn = sqlite3.connect(path/"data"/fname)
+    conn = sqlite3.connect(path / "data" / fname)
     with conn:
-        with open(path/"data/table1.sql") as f:
+        with open(path / "data/table1.sql") as f:
             conn.executescript(f.read())
 
-        with open(path/"data/table2.sql") as f:
+        with open(path / "data/table2.sql") as f:
             conn.executescript(f.read())
 
 

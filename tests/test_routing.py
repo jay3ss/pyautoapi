@@ -9,7 +9,7 @@ import pyautoapi.database as db
 
 @pytest.fixture
 def query():
-    path = pathlib.Path(__file__).parent/"data/test.db"
+    path = pathlib.Path(__file__).parent / "data/test.db"
     engine = db.load_db(path)
     return db.Query(engine)
 
@@ -36,7 +36,10 @@ def test_create_path_name():
     assert rt.create_path_name(["this", "is", "my_path"]) == "/this/is/my_path"
     # it's ok to lose the space character in the below test because this isn't
     # going to be read by humans
-    assert rt.create_path_name(["this", "is", "my", "path", "{variable: type}"]) == "/this/is/my/path/{variable:type}"
+    assert (
+        rt.create_path_name(["this", "is", "my", "path", "{variable: type}"])
+        == "/this/is/my/path/{variable:type}"
+    )
 
 
 def test_create_route_basic(query):
@@ -45,8 +48,10 @@ def test_create_route_basic(query):
     path, endpoint = rt.create_route(function_params, query.read, methods)
     assert path == "/{table:str}"
     assert endpoint.__name__ == "get_table_str_endpoint"
+
     async def get_num_results():
         assert len((await endpoint("table1"))["data"]) == 100
+
     asyncio.run(get_num_results())
 
 
@@ -54,9 +59,13 @@ def test_create_route_query_params(query):
     function_params = {"table": "str"}
     methods = ["GET"]
     query_params = {"column": "str", "conditional": "str", "value": "int"}
-    path, endpoint = rt.create_route(function_params, query.read, methods, query_params=query_params)
+    path, endpoint = rt.create_route(
+        function_params, query.read, methods, query_params=query_params
+    )
     assert path == "/{table:str}"
+
     async def get_num_results():
         assert len((await endpoint("table1", "id", "=", 1))["data"]) == 1
+
     asyncio.run(get_num_results())
     assert endpoint.__name__ == "get_table_str_endpoint"

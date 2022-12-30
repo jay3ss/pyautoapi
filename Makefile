@@ -15,15 +15,14 @@ setup:
 	python -m pip install -r requirements.txt
 	python -m pip install -e .
 
-run:
-	@echo "Running project on port $(port)"
-	uvicorn main:app --reload --port $(port)
-
-init-tests:
-	python tests/bin/create_test_database.py
+dev-setup:
+	@echo "Setting up project for development..."
+	python -m pip install -r requirements-dev.txt
 
 test:
+	python tests/bin/create_test_database.py
 	python -m pytest -vv
+	rm tests/data/test.db
 
 clean:
 	rm -rf `find . -name __pycache__  -type d`
