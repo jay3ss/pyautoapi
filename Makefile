@@ -24,6 +24,10 @@ test:
 	python -m pytest -vv
 	rm tests/data/test.db
 
+static-analysis:
+	python -m black .
+	python -m flake8 .
+
 clean:
 	rm -rf `find . -name __pycache__  -type d`
 
