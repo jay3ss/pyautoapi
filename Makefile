@@ -1,13 +1,18 @@
-.PHYONY = help run setup
+.PHYONY = help run setup dev-setup test format clean lint coverage
 
 port := 8000
 
 help:
-	@echo "---------------HELP-----------------"
-	@echo "To setup the project type make setup"
-	@echo "To clean the project type make clean"
-	@echo "To run the project type make run"
-	@echo "------------------------------------"
+	@echo "------------------HELP------------------"
+	@echo "help      - get this help message"
+	@echo "setup     - setup project"
+	@echo "dev-setup - setup project for development"
+	@echo "clean     - remove Python artifacts"
+	@echo "coverage  - measure code coverage"
+	@echo "format    - format code with black"
+	@echo "lint      - check style with flake8"
+	@echo "test      - run tests with pytest"
+	@echo "-----------------------------------------"
 
 setup:
 	@echo "Setting up project..."
@@ -20,14 +25,19 @@ dev-setup:
 	python -m pip install -r requirements-dev.txt
 
 test:
-	python tests/bin/create_test_database.py
-	python -m pytest -vv
-	rm tests/data/test.db
+	python -m pytest -c pytest.ini
 
-static-analysis:
+format:
 	python -m black .
-	python -m flake8 .
+
+lint:
+	python -m flake8 . --config flake8.ini
+
+coverage:
+	coverage run -m pytest -c pytest.ini
+	coverage report
+	coverage html
 
 clean:
 	rm -rf `find . -name __pycache__  -type d`
-
+	find . -name '*~' -exec rm -iv {} +
