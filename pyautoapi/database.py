@@ -153,7 +153,6 @@ class QueryValidator:
         conditional: str = None,
         value: ValueTypes = None,
     ) -> bool:
-
         if not self._validate_table(table):
             return False
 

@@ -37,6 +37,7 @@ def create_route(
     Returns:
         tuple[str, Callable]: the path (str), and endpoint function (Callable)
     """
+
     def dict_to_key_pair_brackets_strs(d: dict) -> list:
         return [f"{{{key}: {value}}}" for key, value in d.items()]
 
