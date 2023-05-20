@@ -219,7 +219,7 @@ class Query:
             if column and conditional and value:
                 if isinstance(value, str):
                     value = f"'{value}'"
-                condition = sa.text(f"{getattr(Model, column)} {conditional} {value}")
+                condition = sa.text(f"{getattr(Model, column)} {conditional} {value};")
                 statement = sa.select(Model).where(condition)
             else:
                 statement = sa.select(Model)
