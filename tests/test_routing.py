@@ -60,7 +60,7 @@ def test_create_route_query_params(query):
     methods = ["GET"]
     query_params = {"column": "str", "conditional": "str", "value": "int"}
     path, endpoint = rt.create_route(
-        function_params, query.read, methods, query_params=query_params
+        function_params, query.query, methods, query_params=query_params
     )
     assert path == "/{table:str}"
 
