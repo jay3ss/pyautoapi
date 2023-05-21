@@ -1,6 +1,6 @@
+import re
 from collections import OrderedDict
 from functools import reduce
-import re
 from typing import Any, Callable
 from urllib.parse import urljoin as pathjoin
 
