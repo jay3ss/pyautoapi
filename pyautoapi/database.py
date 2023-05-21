@@ -199,7 +199,3 @@ class Query:
             results = session.execute(statement).mappings().all()
 
         return results
-
-
-class InvalidQueryError(Exception):
-    pass
