@@ -14,16 +14,18 @@ PathLike = TypeVar("PathLike", str, pathlib.Path, None)
 ValueTypes = TypeVar("ValueTypes", int, str, float)
 
 
-def load_db(path: str | PathLike) -> Engine:
+def load_db(path: str | PathLike, echo: bool = False) -> Engine:
     """Returns a connection to the SQLite database
 
     Args:
         path (str | PathLike): the path to the database file
+        echo (bool, optional): if True, the Engine will log all statements.
+        Default False.
 
     Returns:
         Engine: a connection to the database
     """
-    return sa.create_engine(f"sqlite:///{path}", echo=True)
+    return sa.create_engine(f"sqlite:///{path}", echo=echo)
 
 
 def inspect(db: Engine) -> dict:
