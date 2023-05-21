@@ -190,14 +190,9 @@ class Query:
 
         Args:
             query (str): the SQL query to execute
-            col (str): (optional) the column to
-            conditional (str): (optional) the comparison operator to be used
-            from this set of values: ["=", "<", ">", "<>", "<=", ">="]
-            value (ValueTypes): (optional) the value to compare to (acceptable
-            types are int str, or float)
 
         Returns:
-            Lists: returns a read query
+            Lists: returns the results of the query
         """
         with Session(self._engine) as session:
             statement = sa.text(query)
