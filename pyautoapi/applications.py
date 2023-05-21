@@ -1,5 +1,5 @@
 import pathlib
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from fastapi import FastAPI
 
@@ -46,8 +46,8 @@ def _create_all_routes(db_path: PathLike) -> list[rt.Route]:
     engine = db.load_db(pathlib.Path(db_path))
     query = db.Query(engine)
 
-    function_params = {"table": "str"}
+    function_params = {"query": "str"}
     methods = ["GET"]
-    path, endpoint = rt.create_route(function_params, query.read, methods)
+    path, endpoint = rt.create_route(function_params, query.execute, methods)
     route = rt.Route(path=path, endpoint=endpoint, methods=methods)
     return [route]
