@@ -48,7 +48,7 @@ class PyAutoAPI(FastAPI):
             echo (bool, optional): if True, the Engine will log all statements.
             Default False.
         """
-        query = Query(_load_db(url=db_url, echo=echo))
+        query = Query(sa.create_engine(url=url, echo=echo))
         route = Route(query=query)
         self.router.add_api_route(
             path=route.path, endpoint=route.endpoint, methods=route.methods
@@ -133,19 +133,6 @@ class Results:
     def __bool__(self) -> bool:
         return self.successful
 
-
-def _load_db(url: UrlLike, echo: bool = False) -> Engine:
-    """Returns a connection to the SQLite database
-
-    Args:
-        url (UrlLike): the url to the database
-        echo (bool, optional): if True, the Engine will log all statements.
-        Default False.
-
-    Returns:
-        Engine: a connection to the database
-    """
-    return sa.create_engine(url=url, echo=echo)
 
 import uvicorn
 url = f'sqlite:///{str(pathlib.Path("test.db"))}'
