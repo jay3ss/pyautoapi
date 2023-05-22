@@ -1,1 +1,1 @@
-from .applications import PyAutoAPI
+from .pyautoapi import PyAutoAPI
