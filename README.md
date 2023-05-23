@@ -3,6 +3,15 @@
 Give it your database and it gives you an API with an endpoint for each column in
 each table (don't worry, you can exclude whatever table/column you like).
 
+***WARNING***: there's absolutely ***no*** security whatsoever. ***Don't*** use
+this in production. This should only be used to explore a database or to play
+around. If you use it for anything else then that is on ***YOU***.
+
+## Motivation
+
+I was working on a project and needed a way to easily spin up an API. The project
+has long since finished, but I had to scratch that itch.
+
 ## How to Use
 
 ### Requirements
