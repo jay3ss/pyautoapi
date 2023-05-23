@@ -5,9 +5,8 @@ from typing import TypeVar
 import sqlalchemy as sa
 from fastapi import FastAPI, HTTPException, Response, status
 from fastapi.routing import APIRoute
-from sqlalchemy.engine.base import Engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 
 # adapted from @maf88's comment on:
@@ -23,7 +22,7 @@ class PyAutoAPI(FastAPI):
         title: str = "PyAutoAPI",
         description: str = "",
         version: str = "0.0.2",
-        echo: bool = False
+        **kwargs: dict,
     ) -> None:
         super().__init__(
             debug=debug,
@@ -31,24 +30,24 @@ class PyAutoAPI(FastAPI):
             title=title,
             description=description,
             version=version,
+            **kwargs,
         )
         if db_url:
-            self.init_api(db_url=db_url, echo=echo)
+            self.init_api(db_url=db_url)
 
     def init_api(
             self,
             db_url: UrlLike,
-            echo: bool = False,
+            **sa_kwargs: dict
         ) -> None:
         """
-        Initialize the app
+        Initialize the app.
 
         Args:
-            db_url (UrlLike): url to the database
-            echo (bool, optional): if True, the Engine will log all statements.
-            Default False.
+            db_url (UrlLike): a string or URL to connect to the database
+            sa_kwargs (dict): key words arguments for SQLAlchemy's `sessionmaker`.
         """
-        query = Query(sa.create_engine(url=url, echo=echo))
+        query = Query(db_url=db_url, **sa_kwargs)
         route = Route(query=query)
         self.router.add_api_route(
             path=route.path, endpoint=route.endpoint, methods=route.methods
@@ -83,8 +82,9 @@ class Query:
     NOTE: currently only supports the R in CRUD
     """
 
-    def __init__(self, engine: Engine) -> None:
-        self._engine = engine
+    def __init__(self, db_url: UrlLike, **sa_kwargs) -> None:
+        engine = sa.create_engine(db_url)
+        self._Session = sessionmaker(bind=engine, **sa_kwargs)
 
     def execute(self, query: str) -> "Results":
         """Runs the given query on the database
@@ -95,8 +95,32 @@ class Query:
         Returns:
             Lists: returns the results of the query
         """
-        with Session(self._engine) as session:
-            statement = sa.text(query)
+        statement = sa.text(query)
+        # with Session(self._session) as session:
+        with self._Session() as session:
+            # with conn.begin():
+            #     statement = sa.text(query)
+            #     try:
+            #         # the mappings method allows us to get the result in
+            #         # a list of dicts
+            #         res = conn.execute(statement).mappings().all()
+            #         results = Results(results=res, successful=True)
+            #     except (sa.exc.OperationalError, sa.exc.IntegrityError) as e:
+            #         # TODO: implement logging
+            #         # for now, just print the error.
+            #         print(e, flush=True)
+            #         results = Results(error=e)
+            #     except sa.exc.ResourceClosedError as e:
+            #         try:
+            #             # if we're here we're probably trying to:
+            #             # insert, update, or delete -> need to commit
+            #             conn.execute(statement)
+            #             # session.commit()
+            #             res = [{"info": "Statement executed successfully"}]
+            #             results = Results(results=res, successful=True)
+            #         except Exception as e:
+            #             print(e, flush=True)
+            #             results = Results(error=e)
             try:
                 # the mappings method allows us to get the result in
                 # a list of dicts
@@ -112,7 +136,7 @@ class Query:
                     # if we're here we're probably trying to:
                     # insert, update, or delete -> need to commit
                     session.execute(statement)
-                    session.commit()
+                    # session.commit()
                     res = [{"info": "Statement executed successfully"}]
                     results = Results(results=res, successful=True)
                 except Exception as e:
@@ -135,17 +159,25 @@ class Results:
 
 
 import uvicorn
-url = f'sqlite:///{str(pathlib.Path("test.db"))}'
-api = PyAutoAPI(url, debug=True)
-# api = PyAutoAPI(debug=True)
-uvicorn.run(api)
+api = PyAutoAPI(debug=True)
+
+
 if __name__ == "__main__":
-    import argparse
+    # import argparse
     import uvicorn
 
-    parser = argparse.ArgumentParser(description="Automatic API")
-    parser.add_argument("--db", action="store", dest="db", help="Path to the database file")
-    results = parser.parse_args()
+    # parser = argparse.ArgumentParser(description="Automatic API")
+    # parser.add_argument("--db", action="store", dest="db", help="Path to the database file")
+    # results = parser.parse_args()
 
-    api.init_api(results.db)
-    uvicorn.run(api)
+    # api.init_api(results.db)
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    url = f'sqlite:///{str(pathlib.Path("test.db"))}'
+
+    engine = create_engine(url)
+    Session = sessionmaker(bind=engine)
+    with Session() as session:
+        api.init_api(session=session)
+        uvicorn.run(api)

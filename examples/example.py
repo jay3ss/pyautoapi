@@ -10,17 +10,26 @@ where <port> is your desired port. If you want to run it on the default port
 import pathlib
 
 import uvicorn
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 import pyautoapi as pyapi
-from .create_db import create_test_database
+from create_db import create_test_database
 
 
-test_db = "test.db"
-if not pathlib.Path(test_db).exists():
-    create_test_database(test_db)
-
-api = pyapi.PyAutoAPI(test_db)
+api = pyapi.PyAutoAPI(debug=True)
 
 
 if __name__ == "__main__":
-    uvicorn.run(f"{pathlib.Path(__file__).stem}:api", port=5555, reload=True)
+    test_db = "test.db"
+    db_path = pathlib.Path(__file__).parent.parent / test_db
+    if not db_path.exists():
+        create_test_database(test_db)
+
+    url = f'sqlite:///{str(db_path)}'
+
+    engine = create_engine(url)
+    Session = sessionmaker(bind=engine)
+    with Session() as session:
+        api.init_api(session=session)
+        uvicorn.run(f"{pathlib.Path(__file__).stem}:api", port=5555, reload=True)
