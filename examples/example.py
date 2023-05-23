@@ -11,7 +11,6 @@ import pathlib
 
 import uvicorn
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 import pyautoapi as pyapi
 from create_db import create_test_database
@@ -24,12 +23,10 @@ if __name__ == "__main__":
     test_db = "test.db"
     db_path = pathlib.Path(__file__).parent.parent / test_db
     if not db_path.exists():
-        create_test_database(test_db)
+        create_test_database(db_path)
 
     url = f'sqlite:///{str(db_path)}'
 
     engine = create_engine(url)
-    Session = sessionmaker(bind=engine)
-    with Session() as session:
-        api.init_api(session=session)
-        uvicorn.run(f"{pathlib.Path(__file__).stem}:api", port=5555, reload=True)
+    api.init_api(database=engine)
+    uvicorn.run(api, port=5555)
