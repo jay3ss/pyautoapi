@@ -7,7 +7,7 @@ def test_execute_query(api_client):
 
     # Assert that the response is successful and contains the expected query
     assert response.status_code == 200
-    assert response.text == "SELECT * FROM table1"
+    assert len(response.json()) == 100
 
 
 def test_invalid_query(api_client):
