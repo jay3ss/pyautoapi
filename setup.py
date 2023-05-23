@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="PyAutoAPI",
-    version="0.0.2",
+    version="0.0.3",
     description="Easily and automatically turn a database into an API",
     author="jay3ss",
     long_description=long_description,
