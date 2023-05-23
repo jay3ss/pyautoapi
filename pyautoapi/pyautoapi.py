@@ -32,11 +32,7 @@ class PyAutoAPI(FastAPI):
         if database:
             self.init_api(database=database)
 
-    def init_api(
-            self,
-            database: Database = None,
-            **kwargs: dict
-        ) -> None:
+    def init_api(self, database: Database = None, **kwargs: dict) -> None:
         """
         Initialize the app.
 
@@ -52,12 +48,7 @@ class PyAutoAPI(FastAPI):
 
 
 class Route(APIRoute):
-    def __init__(
-        self,
-        query: "Query",
-        path: str = "/",
-        methods: list = None
-    ) -> None:
+    def __init__(self, query: "Query", path: str = "/", methods: list = None) -> None:
         if not methods:
             methods = ["get", "post"]
         self._query = query
@@ -82,8 +73,10 @@ class Query:
         elif isinstance(database, sa.Engine):
             engine = database
         else:
-            msg = ("Invalid type for 'database' parameter. Expected str, "
-                   f"Engine, or URL, but received {type(database)}.")
+            msg = (
+                "Invalid type for 'database' parameter. Expected str, "
+                f"Engine, or URL, but received {type(database)}."
+            )
             raise TypeError(msg)
         self._Session = sessionmaker(bind=engine, **kwargs)
 
@@ -123,6 +116,7 @@ class Results:
     """
     Holds the results of executing a database statement
     """
+
     results: list[dict] = None
     successful: bool = False
     error: str = None

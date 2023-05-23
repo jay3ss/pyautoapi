@@ -25,7 +25,7 @@ if __name__ == "__main__":
     if not db_path.exists():
         create_test_database(db_path)
 
-    url = f'sqlite:///{str(db_path)}'
+    url = f"sqlite:///{str(db_path)}"
 
     engine = create_engine(url)
     api.init_api(database=engine)

@@ -36,7 +36,9 @@ def test_query_non_existent_table(api_client):
 def test_valid_insert_statement(api_client):
     statement = """INSERT INTO table1(txt, num, int, rl, blb)
     VALUES ('did it work?', 3.1415927, 468, 137.0001, CAST('new blob' AS BLOB))
-    """.replace("\n", " ")
+    """.replace(
+        "\n", " "
+    )
     response = api_client.post(f"/?statement={statement}")
 
     assert response.status_code == 200
@@ -51,7 +53,9 @@ def test_invalid_insert_statement(api_client):
     # notice the missing `num` column
     statement = """INSERT INTO table1(txt, int, rl, blb)
     VALUES ('did it work?', 3.1415927, 468, 137.0001, CAST('new blob' AS BLOB))
-    """.replace("\n", " ")
+    """.replace(
+        "\n", " "
+    )
     response = api_client.post(f"/?statement={statement}")
 
     assert response.status_code == 200
