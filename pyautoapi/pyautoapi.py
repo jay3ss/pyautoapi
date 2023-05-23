@@ -77,10 +77,7 @@ class Route(APIRoute):
 
 
 class Query:
-    """Object to query the database.
-
-    NOTE: currently only supports the R in CRUD
-    """
+    """Object to query the database."""
 
     def __init__(self, db_url: UrlLike, **sa_kwargs) -> None:
         engine = sa.create_engine(db_url)
