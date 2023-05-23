@@ -38,16 +38,16 @@ class PyAutoAPI(FastAPI):
     def init_api(
             self,
             db_url: UrlLike,
-            **sa_kwargs: dict
+            **kwargs: dict
         ) -> None:
         """
         Initialize the app.
 
         Args:
             db_url (UrlLike): a string or URL to connect to the database
-            sa_kwargs (dict): key words arguments for SQLAlchemy's `sessionmaker`.
+            kwargs (dict): key words arguments for SQLAlchemy's `sessionmaker`.
         """
-        query = Query(db_url=db_url, **sa_kwargs)
+        query = Query(db_url=db_url, **kwargs)
         route = Route(query=query)
         self.router.add_api_route(
             path=route.path, endpoint=route.endpoint, methods=route.methods
@@ -179,5 +179,5 @@ if __name__ == "__main__":
     engine = create_engine(url)
     Session = sessionmaker(bind=engine)
     with Session() as session:
-        api.init_api(session=session)
+        api.init_api(db_url=url)
         uvicorn.run(api)
