@@ -7,16 +7,17 @@ from pyautoapi import PyAutoAPI
 from sqlalchemy.orm import sessionmaker
 
 
-@pytest.fixture(scope="session")
-def test_db_path() -> str:
-    return "sqlite:///:memory:"
+@pytest.fixture(scope="module")
+def db_string_url(tmp_path_factory):
+    return tmp_path_factory.mktemp("test").joinpath("test.db")
 
 
 # Create a test database and populate with data
 @pytest.fixture(scope="session")
-def test_database(test_db_path):
+def test_database(tmp_path_factory):
     # Create an in-memory SQLite database
-    engine = sa.create_engine(test_db_path)
+    db_path = tmp_path_factory.mktemp("test").joinpath("test.db")
+    engine = sa.create_engine(f"sqlite:///{db_path}")
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -42,11 +43,11 @@ def test_database(test_db_path):
     engine.dispose()
 
 
-@pytest.fixture(scope="module")
-def api_client(test_db_path):
+@pytest.fixture(scope="session")
+def api_client(test_database):
     # Create a test client for the API
     api = PyAutoAPI()
-    api.init_api(test_db_path)
+    api.init_api(test_database)
     client = TestClient(app=api)
 
     yield client
