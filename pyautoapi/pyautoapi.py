@@ -1,6 +1,6 @@
 import pathlib
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Union
 
 import sqlalchemy as sa
 from fastapi import FastAPI, HTTPException, Response, status
@@ -9,15 +9,13 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 
 
-# adapted from @maf88's comment on:
-# https://stackoverflow.com/a/58541858
-UrlLike = TypeVar("UrlLike", str, URL)
+Database = Union[str, sa.Engine, URL]
 
 
 class PyAutoAPI(FastAPI):
     def __init__(
         self,
-        db_url: UrlLike = None,
+        database: Database = None,
         debug: bool = False,
         title: str = "PyAutoAPI",
         description: str = "",
@@ -32,12 +30,12 @@ class PyAutoAPI(FastAPI):
             version=version,
             **kwargs,
         )
-        if db_url:
-            self.init_api(db_url=db_url)
+        if database:
+            self.init_api(database=database)
 
     def init_api(
             self,
-            db_url: UrlLike,
+            database: Database = None,
             **kwargs: dict
         ) -> None:
         """
@@ -47,7 +45,7 @@ class PyAutoAPI(FastAPI):
             db_url (UrlLike): a string or URL to connect to the database
             kwargs (dict): key words arguments for SQLAlchemy's `sessionmaker`.
         """
-        query = Query(db_url=db_url, **kwargs)
+        query = Query(database=database, **kwargs)
         route = Route(query=query)
         self.router.add_api_route(
             path=route.path, endpoint=route.endpoint, methods=route.methods
@@ -79,9 +77,16 @@ class Route(APIRoute):
 class Query:
     """Object to query the database."""
 
-    def __init__(self, db_url: UrlLike, **sa_kwargs) -> None:
-        engine = sa.create_engine(db_url)
-        self._Session = sessionmaker(bind=engine, **sa_kwargs)
+    def __init__(self, database: Database, **kwargs) -> None:
+        if isinstance(database, (str, URL)):
+            engine = sa.create_engine(database)
+        elif isinstance(database, sa.Engine):
+            engine = database
+        else:
+            msg = ("Invalid type for 'database' parameter. Expected str, "
+                   f"Engine, or URL, but received {type(database)}.")
+            raise TypeError(msg)
+        self._Session = sessionmaker(bind=engine, **kwargs)
 
     def execute(self, query: str) -> "Results":
         """Runs the given query on the database
@@ -93,31 +98,7 @@ class Query:
             Lists: returns the results of the query
         """
         statement = sa.text(query)
-        # with Session(self._session) as session:
         with self._Session() as session:
-            # with conn.begin():
-            #     statement = sa.text(query)
-            #     try:
-            #         # the mappings method allows us to get the result in
-            #         # a list of dicts
-            #         res = conn.execute(statement).mappings().all()
-            #         results = Results(results=res, successful=True)
-            #     except (sa.exc.OperationalError, sa.exc.IntegrityError) as e:
-            #         # TODO: implement logging
-            #         # for now, just print the error.
-            #         print(e, flush=True)
-            #         results = Results(error=e)
-            #     except sa.exc.ResourceClosedError as e:
-            #         try:
-            #             # if we're here we're probably trying to:
-            #             # insert, update, or delete -> need to commit
-            #             conn.execute(statement)
-            #             # session.commit()
-            #             res = [{"info": "Statement executed successfully"}]
-            #             results = Results(results=res, successful=True)
-            #         except Exception as e:
-            #             print(e, flush=True)
-            #             results = Results(error=e)
             try:
                 # the mappings method allows us to get the result in
                 # a list of dicts
@@ -129,16 +110,12 @@ class Query:
                 print(e, flush=True)
                 results = Results(error=e)
             except sa.exc.ResourceClosedError as e:
-                try:
-                    # if we're here we're probably trying to:
-                    # insert, update, or delete -> need to commit
-                    session.execute(statement)
-                    # session.commit()
-                    res = [{"info": "Statement executed successfully"}]
-                    results = Results(results=res, successful=True)
-                except Exception as e:
-                    print(e, flush=True)
-                    results = Results(error=e)
+                # if we're here we're probably trying to:
+                # insert, update, or delete -> don't receive results
+                # from executing statement
+                session.execute(statement)
+                res = [{"info": "Statement executed successfully"}]
+                results = Results(results=res, successful=True)
         return results
 
 
@@ -153,28 +130,3 @@ class Results:
 
     def __bool__(self) -> bool:
         return self.successful
-
-
-import uvicorn
-api = PyAutoAPI(debug=True)
-
-
-if __name__ == "__main__":
-    # import argparse
-    import uvicorn
-
-    # parser = argparse.ArgumentParser(description="Automatic API")
-    # parser.add_argument("--db", action="store", dest="db", help="Path to the database file")
-    # results = parser.parse_args()
-
-    # api.init_api(results.db)
-
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import sessionmaker
-    url = f'sqlite:///{str(pathlib.Path("test.db"))}'
-
-    engine = create_engine(url)
-    Session = sessionmaker(bind=engine)
-    with Session() as session:
-        api.init_api(db_url=url)
-        uvicorn.run(api)
