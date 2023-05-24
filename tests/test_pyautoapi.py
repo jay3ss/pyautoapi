@@ -17,7 +17,7 @@ def test_invalid_query(api_client):
     response = api_client.post("/?statement=INVALID QUERY")
 
     # Assert that the response is a bad request
-    assert response.json()["status_code"] == 400
+    assert response.status_code == 400
 
 
 def test_query_non_existent_table(api_client):
@@ -25,11 +25,10 @@ def test_query_non_existent_table(api_client):
     response = api_client.get("/?statement=SELECT * FROM does_not_exist")
 
     # Assert that the response is successful and contains the query results
-    assert response.status_code == 200
+    assert response.status_code == 400
 
     response_data = response.json()
-    assert response_data is not None
-    assert response_data["status_code"] == 400
+    assert "detail" in response_data
     assert "Invalid statement" in response_data["detail"]
 
 
@@ -58,11 +57,9 @@ def test_invalid_insert_statement(api_client):
     )
     response = api_client.post(f"/?statement={statement}")
 
-    assert response.status_code == 200
+    assert response.status_code == 400
 
     response_data = response.json()
-    assert "status_code" in response_data
-    assert response_data["status_code"] == 400
     assert "detail" in response_data
     assert "Invalid statement" in response_data["detail"]
 

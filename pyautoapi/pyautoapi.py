@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union
+from typing import Any, Union
 
 import sqlalchemy as sa
 from fastapi import FastAPI, HTTPException, Response, status
@@ -18,8 +18,8 @@ class PyAutoAPI(FastAPI):
         debug: bool = False,
         title: str = "PyAutoAPI",
         description: str = "",
-        version: str = "0.0.2",
-        **kwargs: dict,
+        version: str = "0.0.3a1",
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             debug=debug,
@@ -32,13 +32,13 @@ class PyAutoAPI(FastAPI):
         if database:
             self.init_api(database=database)
 
-    def init_api(self, database: Database = None, **kwargs: dict) -> None:
+    def init_api(self, database: Database = None, **kwargs: Any) -> None:
         """
         Initialize the app.
 
         Args:
-            db_url (UrlLike): a string or URL to connect to the database
-            kwargs (dict): key words arguments for SQLAlchemy's `sessionmaker`.
+            database (Database): a string or URL to connect to the database
+            kwargs (Any): key words arguments for SQLAlchemy's `sessionmaker`.
         """
         query = Query(database=database, **kwargs)
         route = Route(query=query)
@@ -59,7 +59,7 @@ class Route(APIRoute):
         if not results:
             status_code = status.HTTP_400_BAD_REQUEST
             detail = f"Invalid statement: {results.error}"
-            return HTTPException(status_code=status_code, detail=detail)
+            raise HTTPException(status_code=status_code, detail=detail)
 
         return results.results
 
@@ -67,7 +67,7 @@ class Route(APIRoute):
 class Query:
     """Object to query the database."""
 
-    def __init__(self, database: Database, **kwargs) -> None:
+    def __init__(self, database: Database, **kwargs: Any) -> None:
         if isinstance(database, (str, URL)):
             engine = sa.create_engine(database)
         elif isinstance(database, sa.Engine):
