@@ -20,12 +20,12 @@ setuptools.setup(
     url="https://github.com/jay3ss/pyautoapi",
     packages=setuptools.find_packages(),
     package_dir={
-        "tests" : "tests",
+        "tests": "tests",
         "pyautoapi": "pyautoapi",
         "examples": "examples",
     },
     package_data={
-        "tests" : ["tests/data/*.sql"],
+        "tests": ["tests/data/*.sql"],
         "examples": ["tests/data/*.sql"],
     },
     classifiers=[
@@ -38,5 +38,9 @@ setuptools.setup(
     python_requires=">=3.10",
     install_requires=install_requires,
     extra_require=extra_require,
-    keywords=["PyAutoAPI", "FastAPI", "SQLAlchemy",],
+    keywords=[
+        "PyAutoAPI",
+        "FastAPI",
+        "SQLAlchemy",
+    ],
 )
